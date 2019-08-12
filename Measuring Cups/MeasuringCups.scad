@@ -25,14 +25,14 @@ handleLabel = "5T";
 //$fn = 30; // Number of facets -- very inneficient way to control rendering smoothness. Probably should leave this commented
 //
 // Minimum angle - use for final rendering
-// $fa = 3;
+$fa = 3;
 // Minumum size - use for final rendering
-// $fs = 0.2;
+$fs = 0.2;
 //
 // Minimum angle -  use for previewing
-$fa = 5;
+// $fa = 5;
 // Minumum size - use for previewing
-$fs = 1;
+// $fs = 1;
 
 // Corner roundness
 cornerDiameter = 2;
