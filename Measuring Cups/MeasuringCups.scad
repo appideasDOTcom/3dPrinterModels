@@ -38,7 +38,7 @@ font = "monaco"; // label font - You maybe want something like "courier" for Win
 
 multiplicationFactor = 1.05; // Scale the input radius for the given volume by this much to account for printing inaccuaracies (1.0 = 100%). Default: 105%
 
-textOffsetDivisor = 3.2; // Set the distance of the label from the cup. 2.5 will roughly center a two character label on the handle.
+textOffsetDivisor = 3.1; // Set the distance of the label from the cup. 2.5 will roughly center a two character label on the handle.
 
 // get to work!
 // To make different cups, replace the first input the number of tablespoons to make
