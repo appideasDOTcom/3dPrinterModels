@@ -36,7 +36,7 @@ letterHeight = 1.4; // label letter height. Too tall is brittle. Too short can't
 fontSize = 6; // label font size. 6 is as large as will fit on the handle.
 font = "monaco"; // label font - You maybe want something like "courier" for Windows. I dunno. This was done on a Mac, and that's probably the only place "monaco" will work. Sorry.
 
-multiplicationFactor = 1.05; // Scale the input radius for the given volume by this much to account for printing inaccuaracies (1.0 = 100%). Default: 105%
+multiplicationFactor = 1.05; // Scale the input radius for the given volume by this much to account for printing inaccuaracies (1.0 = 100%).
 
 textOffsetDivisor = 3.1; // Set the distance of the label from the cup. 2.5 will roughly center a two character label on the handle.
 
