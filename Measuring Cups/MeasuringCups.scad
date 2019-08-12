@@ -16,31 +16,46 @@ variables to alter the output. Read the comments for details.
 - 2019-10-11
 **/
 
-numberOfTablespoons = 5; // Set this to the number of tablespoons the cup is to measure
-handleLabel = "5T"; // Set this to the label you want to appear on the handle. 2 - 4 characters
+// The number of tablespoons the cup is to measure
+numberOfTablespoons = 5;
+// The label you want to appear on the handle (2-4 characters)
+handleLabel = "5T";
 
 // Default facet count settings (control model smoothness)
 //$fn = 30; // Number of facets -- very inneficient way to control rendering smoothness. Probably should leave this commented
 //
-$fa = 3; // minimum angle -- use for final rendering
-$fs = 0.2; // minumum size -- use for final rendering
+// Minimum angle - use for final rendering
+// $fa = 3;
+// Minumum size - use for final rendering
+// $fs = 0.2;
 //
-// $fa = 5; // minimum angle --  use for previewing
-// $fs = 1; // minumum size -- use for previewing
+// Minimum angle -  use for previewing
+$fa = 5;
+// Minumum size - use for previewing
+$fs = 1;
 
-cornerDiameter = 2; // how round to make the corners
-lipRadius = 10; // the radius of the pouring lip
-bottomClearance = 2; // the thickness of the floor and shell at its minimum
+// Corner roundness
+cornerDiameter = 2;
+// Radius of the pouring lip
+lipRadius = 10;
+// Thickness of the floor and shell, at its minimum
+bottomClearance = 2;
 
-letterHeight = 1.4; // label letter height. Too tall is brittle. Too short can't bee seen.
-fontSize = 6; // label font size. 6 is as large as will fit on the handle.
-font = "monaco"; // label font - You maybe want something like "courier" for Windows. I dunno. This was done on a Mac, and that's probably the only place "monaco" will work. Sorry.
+// Label letter height. Too tall is brittle, too short can't bee seen
+letterHeight = 1.4; 
+// Label font size. 6 is as large as will fit on the handle
+fontSize = 6;
+// Label font. You maybe want something like "courier" for Windows.
+font = "monaco"; 
 
-multiplicationFactor = 1.05; // Scale the input radius for the given volume by this much to account for printing inaccuaracies (1.0 = 100%).
+// Scale the input radius for the given volume by this much to account for printing inaccuaracies (1.0 = 100%).
+multiplicationFactor = 1.05; 
 
-textOffsetDivisor = 3.1; // Set the distance of the label from the cup. 2.5 will roughly center a two character label on the handle.
+// Set the distance of the label from the cup. 2.5 will roughly center a two character label on the handle.
+textOffsetDivisor = 3.1; 
 
-baseRadiusMultiplier = 0.7; // Set the scale of the base (bottom) of the unit in relation to the desired measuring amount
+// Set the scale of the base (bottom) of the unit in relation to the desired measuring amount
+baseRadiusMultiplier = 0.7; 
 
 // get to work!
 // To make different cups, replace the first input the number of tablespoons to make
