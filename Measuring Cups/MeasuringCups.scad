@@ -40,6 +40,8 @@ multiplicationFactor = 1.05; // Scale the input radius for the given volume by t
 
 textOffsetDivisor = 3.1; // Set the distance of the label from the cup. 2.5 will roughly center a two character label on the handle.
 
+baseRadiusMultiplier = 0.7; // Set the scale of the base (bottom) of the unit in relation to the desired measuring amount
+
 // get to work!
 // To make different cups, replace the first input the number of tablespoons to make
 //   and change the second input to a string (2-4 characters) to print on the handle
@@ -72,7 +74,7 @@ module makeCup( tablespoons, label )
 					}
 				}
 				{
-					sphere( (radius * 0.7) ); // make a bottom partial sphere for a more solid base and cleaner printing
+					sphere( (radius * baseRadiusMultiplier) ); // make a bottom partial sphere for a more solid base and cleaner printing
 				}
 			}
 			union() // cutout out the top and bottom of the shell
