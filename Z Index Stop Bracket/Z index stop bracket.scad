@@ -19,6 +19,12 @@ extraShelfHeight = 0;
 extraGulfWidth = 0;
 // extraGulfWidth = 0.2;
 
+// Whether or not the nut trap should be rendered
+renderNutTrap = true;
+
+// Determine the side of the piece that contains the nut trap. Set to false for "left"
+nutTrapRight = true;
+
 // Turn bolt cutouts into a module so they can be reused
 module boltCutouts()
 {
@@ -46,15 +52,29 @@ module boltCutouts()
               $fn=64;    //set sides to 64
               cylinder(r1=2.1, r2=2.1, h=20, center=false);
 
-              wallOffset = 16;
-              translate( [0, 0, (wallOffset - 1.5)] )
+              if( renderNutTrap )
               {
-                cylinder(h = 4.5, r = 4.95, $fn=6);
+                if( nutTrapRight )
+                {
+                  nutTrap( 16 );
+                }
+                else
+                {
+                  nutTrap( 2.5 );
+                }
               }
             }
           }
         }
       }
+}
+
+module nutTrap( wallOffset )
+{
+  translate( [0, 0, (wallOffset - 1.5)] )
+  {
+    cylinder(h = 4.5, r = 4.95, $fn=6);
+  }
 }
 
 // Create an "S" shaped curve for model strength on what would otherwise be a corner
