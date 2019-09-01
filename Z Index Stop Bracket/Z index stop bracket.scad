@@ -45,6 +45,12 @@ module boltCutouts()
             {
               $fn=64;    //set sides to 64
               cylinder(r1=2.1, r2=2.1, h=20, center=false);
+
+              wallOffset = 16;
+              translate( [0, 0, (wallOffset - 1.5)] )
+              {
+                cylinder(h = 4.5, r = 4.95, $fn=6);
+              }
             }
           }
         }
