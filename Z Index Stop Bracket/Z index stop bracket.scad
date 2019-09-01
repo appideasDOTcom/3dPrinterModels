@@ -4,13 +4,20 @@
 //   add a few variables to the top to adjust the output more easily (without changing code)
 
 // Add length to the arm, making the limit switch further away from the center
-extraLength = 5;
+extraLength = 0;
+// extraLength = 5;
+
 // Add some girth to the arm to make it less likely to break
-extraThickness = 1;
+extraThickness = 0;
+// extraThickness = 1;
+
 // Add height to the shelf risers to hold the unit in place more firmly
-extraShelfHeight = 0.6;
+extraShelfHeight = 0;
+// extraShelfHeight = 0.6;
+
 // Add some space to the valley between the shelf risers for tolerance
-extraGulfWidth = 0.2;
+extraGulfWidth = 0;
+// extraGulfWidth = 0.2;
 
 // Turn bolt cutouts into a module so they can be reused
 module boltCutouts()
