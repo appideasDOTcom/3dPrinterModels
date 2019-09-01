@@ -8,11 +8,11 @@ Magnets for the fridge
 // Default facet count settings (control model smoothness)
 //$fn = 64; // Number of facets -- very inneficient way to control rendering smoothness. Probably should leave this commented
 //
-$fa = 4; // minimum angle -- use for final rendering
-$fs = 0.5; // minumum size -- use for final rendering
+$fa = 3; // minimum angle -- use for final rendering
+$fs = 0.2; // minumum size -- use for final rendering
 //
-//$fa = 5; // minimum angle --  use for previewing
-//$fs = 1; // minumum size -- use for previewing
+// $fa = 5; // minimum angle --  use for previewing
+// $fs = 1; // minumum size -- use for previewing
 
 // variables
 
@@ -45,10 +45,10 @@ module magnets()
     {
         magnet();
     }
-    translate( [0, -4, -0.1] )
-    {
-        magnet();
-    }
+    // translate( [0, -4, -0.1] )
+    // {
+    //     magnet();
+    // }
 }
 
 
@@ -121,8 +121,8 @@ module words()
 
 module magnet()
 {
-    cutoutDiameter = 7.0;
-    cutoutHeight = 3.8;
+    cutoutDiameter = 10.4;
+    cutoutHeight = 2.4;
     
     cylinder( h = cutoutHeight, d = cutoutDiameter );
 }
