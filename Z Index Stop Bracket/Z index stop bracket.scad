@@ -12,12 +12,12 @@ extraThickness = 0;
 // extraThickness = 1;
 
 // Add height to the shelf risers to hold the unit in place more firmly
-extraShelfHeight = 0;
-// extraShelfHeight = 0.6;
+// extraShelfHeight = 0;
+extraShelfHeight = 0.6;
 
 // Add some space to the valley between the shelf risers for tolerance
-extraGulfWidth = 0;
-// extraGulfWidth = 0.2;
+// extraGulfWidth = 0;
+extraGulfWidth = 0.2;
 
 // Whether or not the nut trap should be rendered
 renderNutTrap = true;
@@ -73,7 +73,7 @@ module nutTrap( wallOffset )
 {
   translate( [0, 0, (wallOffset - 1.5)] )
   {
-    cylinder(h = 4.5, r = 4.95, $fn=6);
+    cylinder(h = 4.5, r = 3.9, $fn=6);
   }
 }
 
