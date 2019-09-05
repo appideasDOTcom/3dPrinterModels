@@ -16,14 +16,14 @@ cutoutXY = 42.4;
 // How tall to print - or how wide the piece will be. This piece fits between the metal endcaps of the motor housing. The most common motor has a 20mm gap between the raised metal pieces, so you'll probably need that value or less
 height = 19.6;
 // How thick the printed piece will be
-thickness = 6;
+thickness = 7;
 
 // How tall to make the cutout that holds the top nut trap
-topBoltCutoutHeight = 9;
+topBoltCutoutHeight = 10;
 // How wide to make the cutout that holds the top nut trap
 topBoltCutoutWidth = 8;
 // How much material should go beneath the cutout shape for support and space for extra modular options
-topPieceSupport = 5;
+topPieceSupport = 7;
 
 // How thick/tall the top piece will be in total
 topThickness = (topBoltCutoutHeight + topPieceSupport);
@@ -43,7 +43,7 @@ internalNutTrapDistance = ((cutoutXY - distanceBetweenInternalNutTraps)/2);
 topNutTrapDistance = (((cutoutXY + toleranceGap * 2) - distanceBetweenTopNutTraps)/2);
 
 // Set to true to orient the pieces to output for printing
-orientForPrinting = false;
+orientForPrinting = true;
 
 /** Build the final piece(s) here **/
 
@@ -116,22 +116,22 @@ module baseCorners()
 
 module internalNutTraps()
 {
-    translate( [-2.7, internalNutTrapDistance, (height/2)] )
+    translate( [-4.7, internalNutTrapDistance, (height/2)] )
     {
         m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 0 );
     }
 
-    translate( [-2.7, (cutoutXY - internalNutTrapDistance), (height/2)] )
+    translate( [-4.7, (cutoutXY - internalNutTrapDistance), (height/2)] )
     {
         m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 0 );
     }
 
-    translate( [(cutoutXY + 2.7), internalNutTrapDistance, (height/2)] )
+    translate( [(cutoutXY + 4.7), internalNutTrapDistance, (height/2)] )
     {
         m3NutAndThroughHole( yRotationAngle = -90, xRotationAngle = 0 );
     }
 
-    translate( [(cutoutXY + 2.7), (cutoutXY - internalNutTrapDistance), (height/2)] )
+    translate( [(cutoutXY + 4.7), (cutoutXY - internalNutTrapDistance), (height/2)] )
     {
         m3NutAndThroughHole( yRotationAngle = -90, xRotationAngle = 0 );
     }
@@ -146,12 +146,12 @@ module internalNutTraps()
         m3NutAndThroughHole( yRotationAngle = -90, xRotationAngle = 90 );
     }
 
-    translate( [topNutTrapDistance, (cutoutXY + 2.7), (height/2)] )
+    translate( [topNutTrapDistance, (cutoutXY + 4.7), (height/2)] )
     {
         m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 90 );
     }
 
-    translate( [(cutoutXY - topNutTrapDistance), (cutoutXY + 2.7), (height/2)] )
+    translate( [(cutoutXY - topNutTrapDistance), (cutoutXY + 4.7), (height/2)] )
     {
         m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 90 );
     }
@@ -251,6 +251,7 @@ module cutout()
     }
 
     internalNutTraps();
+    roundedBodyCorners();
 }
 
 module top()
@@ -312,6 +313,44 @@ module top()
 
 }
 
+module roundedBodyCorners()
+{
+    xOffset = -3.2;
+    yOffset = 11;
+
+    translate( [(-1 * thickness) - 10 + xOffset, (-1 * (thickness + 10)) + yOffset, -1 ] )
+    {
+        rotate( [0, 0, -45] )
+        {
+            cube( [20, 10, height + 2] );
+        }
+    }
+
+    translate( [cutoutXY + 14.0, 2, -1 ] )
+    {
+        rotate( [0, 0, -135] )
+        {
+            cube( [20, 10, height + 2] );
+        }
+    }
+
+    translate( [cutoutXY + thickness + topThickness - 2.9, cutoutXY + thickness + yOffset + (topThickness - 20), -1 ] )
+    {
+        rotate( [0, 0, 135] )
+        {
+            cube( [20, 10, height + 2] );
+        }
+    }
+
+    translate( [(-1 * thickness) - (topThickness - 9.6), cutoutXY + thickness  + (topThickness - 16.4), -1 ] )
+    {
+        rotate( [0, 0, 45] )
+        {
+            cube( [20, 10, height + 2] );
+        }
+    }
+}
+
 module m4Nut()
 {
     cylinder(h = 4.6, r = 4.1, $fn=6);
@@ -327,10 +366,10 @@ module m4ThroughHole()
     cylinder( r=2.1, h=20, center=false, $fn=256);
 }
 
-// An internal nut trap will go a touch deeper to make sure it's recessed enough - although this is 0.1mm deeper than we're actually coing
+// An internal nut trap will go 2.1mm deeper than necessary to make sure it's recessed enough to allow room for the bolt to be screwed in without boring into the motor body
 module m3InternalNut()
 {
-    cylinder(h = 2.8, r = 3.55, $fn=6);
+    cylinder(h = 4.8, r = 3.55, $fn=6);
 }
 
 module m3ThroughHole()
