@@ -73,7 +73,7 @@ module nutTrap( wallOffset )
 {
   translate( [0, 0, (wallOffset - 1.5)] )
   {
-    cylinder(h = 4.5, r = 3.9, $fn=6);
+    cylinder(h = 4.5, r = 4.1, $fn=6);
   }
 }
 
