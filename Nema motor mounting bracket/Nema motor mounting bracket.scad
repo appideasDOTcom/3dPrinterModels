@@ -7,23 +7,23 @@
  /** Variables at top, functional code below **/
 
  // Render Quality: Minimum angle
-$fa = 3;
+$fa = 1;
  // Render Quality: Minimum size
-$fs = 0.2;
+$fs = 0.1;
 
 // The X and Y dimensions od the motor. Added 0.1mm to the technically correct size for tolerance
-cutoutXY = 42.;
+cutoutXY = 42.4;
 // How tall to print - or how wide the piece will be. This piece fits between the metal endcaps of the motor housing. The most common motor has a 20mm gap between the raised metal pieces, so you'll probably need that value or less
-height = 15;
+height = 19.6;
 // How thick the printed piece will be
-thickness = 7;
+thickness = 6;
 
 // How tall to make the cutout that holds the top nut trap
 topBoltCutoutHeight = 9;
 // How wide to make the cutout that holds the top nut trap
-topBoltCutoutWidth = 7;
+topBoltCutoutWidth = 8;
 // How much material should go beneath the cutout shape for support and space for extra modular options
-topPieceSupport = 4;
+topPieceSupport = 5;
 
 // How thick/tall the top piece will be in total
 topThickness = (topBoltCutoutHeight + topPieceSupport);
@@ -32,25 +32,38 @@ toleranceGap = 0.2;
 
 boltCenterOffset = 0.8;
 
+// Set the distance between the nut traps on main unit
+distanceBetweenInternalNutTraps = 20;
+
+// Set the distance between the nut traps on the top piece. These need to be a little closer to make room for other stuff that may already be in the way.
+distanceBetweenTopNutTraps = 12;
+
+// Calculated for use in code below. Don't change this
+internalNutTrapDistance = ((cutoutXY - distanceBetweenInternalNutTraps)/2);
+topNutTrapDistance = (((cutoutXY + toleranceGap * 2) - distanceBetweenTopNutTraps)/2);
+
+// Set to true to orient the pieces to output for printing
 orientForPrinting = false;
 
-/** Build the final piece here **/
+/** Build the final piece(s) here **/
 
 if( !orientForPrinting )
 {
     mainUnit();
-    corners();
+    baseCorners();
     top();
+    topCorners();
 }
 else
 {
     mainUnit();
-    corners();
-    translate( [77, 8, 0] )
+    baseCorners();
+    translate( [70, 8, 0] )
     {
         rotate( [0, 0, 90] )
         {
             top();
+            topCorners();
         }
     }
 }
@@ -82,38 +95,96 @@ module body()
     }
 }
 
-module corners()
+module baseCorners()
 {
-    translate( [-4.1, 0, 0] )
+    translate( [-4.9, 0, 0] )
     {
         rotate( [0, 0, -45] )
         {
-            cube( [5.8, 5.8, height] );
+            cube( [7, 7, height] );
         }
     }
 
-    translate( [(cutoutXY - 5.8) + 1.7, 0, 0] )
+    translate( [(cutoutXY - 4.9), 0, 0] )
     {
         rotate( [0, 0, -45] )
         {
-            cube( [5.8, 5.8, height] );
+            cube( [7, 7, height] );
         }
     }
+}
 
-    translate( [(cutoutXY - 5.8) + 1.7, (cutoutXY - 5.8) + 5.8, 0] )
+module internalNutTraps()
+{
+    translate( [-2.7, internalNutTrapDistance, (height/2)] )
+    {
+        m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 0 );
+    }
+
+    translate( [-2.7, (cutoutXY - internalNutTrapDistance), (height/2)] )
+    {
+        m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 0 );
+    }
+
+    translate( [(cutoutXY + 2.7), internalNutTrapDistance, (height/2)] )
+    {
+        m3NutAndThroughHole( yRotationAngle = -90, xRotationAngle = 0 );
+    }
+
+    translate( [(cutoutXY + 2.7), (cutoutXY - internalNutTrapDistance), (height/2)] )
+    {
+        m3NutAndThroughHole( yRotationAngle = -90, xRotationAngle = 0 );
+    }
+
+    translate( [internalNutTrapDistance, 0.1, (height/2)] )
+    {
+        m3NutAndThroughHole( yRotationAngle = -90, xRotationAngle = 90 );
+    }
+
+    translate( [(cutoutXY - internalNutTrapDistance), 0.1, (height/2)] )
+    {
+        m3NutAndThroughHole( yRotationAngle = -90, xRotationAngle = 90 );
+    }
+
+    translate( [topNutTrapDistance, (cutoutXY + 2.7), (height/2)] )
+    {
+        m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 90 );
+    }
+
+    translate( [(cutoutXY - topNutTrapDistance), (cutoutXY + 2.7), (height/2)] )
+    {
+        m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 90 );
+    }
+}
+
+module m3NutAndThroughHole( yRotationAngle, xRotationAngle )
+{
+    rotate( [xRotationAngle, yRotationAngle, 0] )
+    {
+        m3InternalNut();
+        translate( [0, 0, -10] )
+        {
+            m3ThroughHole();
+        }
+    }
+}
+
+module topCorners()
+{
+    translate( [(cutoutXY - 4.9), (cutoutXY - 5.8) + 5.8, 0] )
     {
         difference()
         {
             {
                 rotate( [0, 0, -45] )
                 {
-                    cube( [5.8, 5.8, height] );
+                    cube( [7, 7, height] );
                 }
             }
             {
-                translate( [0, (-1 * toleranceGap), -1] )
+                translate( [(4.9 - toleranceGap), -5.8, -1] )
                 {
-                    cube( [5.8, 5.8, (height + 2)] );
+                    cube( [5.8, 11.6, (height + 2)] );
                 }
             }
         }
@@ -124,18 +195,18 @@ module corners()
         difference()
         {
             {
-                translate( [0, -4.1, 0] )
+                translate( [0, -4.9, 0] )
                 {
                     rotate( [0, 0, 45] )
                     {
-                        cube( [5.8, 5.8, height] );
+                        cube( [7, 7, height] );
                     }
                 }
             }
             {
-                translate( [0, (-1 * toleranceGap), -1] )
+                translate( [(-5.8 + toleranceGap), -5.8, -1] )
                 {
-                    cube( [5.8, 5.8, (height + 2)] );
+                    cube( [5.8, 11.6, (height + 2)] );
                 }
             }
         }
@@ -178,6 +249,8 @@ module cutout()
             }
         }
     }
+
+    internalNutTraps();
 }
 
 module top()
@@ -233,6 +306,7 @@ module top()
                     }
                 }
             }
+            internalNutTraps();
         }
     }
 
@@ -251,4 +325,15 @@ module m4HeadCutout()
 module m4ThroughHole()
 {
     cylinder( r=2.1, h=20, center=false, $fn=256);
+}
+
+// An internal nut trap will go a touch deeper to make sure it's recessed enough - although this is 0.1mm deeper than we're actually coing
+module m3InternalNut()
+{
+    cylinder(h = 2.8, r = 3.55, $fn=6);
+}
+
+module m3ThroughHole()
+{
+    cylinder( r=1.6, h=20, center=false, $fn=256);
 }
