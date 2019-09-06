@@ -11,8 +11,8 @@ $fa = 1;
  // Render Quality: Minimum size
 $fs = 0.1;
 
-// The X and Y dimensions od the motor. Added 0.1mm to the technically correct size for tolerance
-cutoutXY = 42.4;
+// The X and Y dimensions od the motor. Added 0.2mm to the technically correct size for tolerance
+cutoutXY = 42.5;
 // How tall to print - or how wide the piece will be. This piece fits between the metal endcaps of the motor housing. The most common motor has a 20mm gap between the raised metal pieces, so you'll probably need that value or less
 height = 19.6;
 // How thick the printed piece will be
@@ -43,7 +43,7 @@ internalNutTrapDistance = ((cutoutXY - distanceBetweenInternalNutTraps)/2);
 topNutTrapDistance = (((cutoutXY + toleranceGap * 2) - distanceBetweenTopNutTraps)/2);
 
 // Set to true to orient the pieces to output for printing
-orientForPrinting = true;
+orientForPrinting = false;
 
 /** Build the final piece(s) here **/
 
