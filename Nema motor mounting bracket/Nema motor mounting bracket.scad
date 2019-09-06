@@ -402,7 +402,7 @@ module m3Spacer( height )
     difference()
     {
         {
-            cylinder( r=(radius + 1.9), h=height, center=false, $fn=circleSides);
+            cylinder( r=(radius + 2.9), h=height, center=false, $fn=circleSides);
         }
         {
             cylinder( r=radius, h=height, center=false, $fn=circleSides);
@@ -420,6 +420,15 @@ module connectedM3ThroughHoles( xDistance, yDistance )
 
 }
 
+module connectedM3HeadCutouts( xDistance, yDistance )
+{
+    m3HeadCutout();
+    translate( [xDistance, yDistance, 0] )
+    {
+        m3HeadCutout();
+    }
+}
+
 module connectedM3Spacers( height, xDistance, yDistance )
 {
     if( yDistance < 1)
@@ -434,9 +443,9 @@ module connectedM3Spacers( height, xDistance, yDistance )
                     {
                         m3Spacer( height );
                     }
-                    translate( [0, (-1 * (7/2)), 0] )
+                    translate( [0, (-1 * (9/2)), 0] )
                     {
-                        cube( [xDistance, 7, height] ); 
+                        cube( [xDistance, 9, height] ); 
                     }
                 }
             }
