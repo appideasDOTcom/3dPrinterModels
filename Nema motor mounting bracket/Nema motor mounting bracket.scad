@@ -11,6 +11,9 @@ $fa = 1;
  // Render Quality: Minimum size
 $fs = 0.1;
 
+// Smoothness of circles. More sides = more render time, but smoother look
+circleSides = 64;
+
 // The X and Y dimensions od the motor. Added 0.2mm to the technically correct size for tolerance
 cutoutXY = 42.5;
 // How tall to print - or how wide the piece will be. This piece fits between the metal endcaps of the motor housing. The most common motor has a 20mm gap between the raised metal pieces, so you'll probably need that value or less
@@ -40,7 +43,7 @@ distanceBetweenTopNutTraps = 12;
 
 // Calculated for use in code below. Don't change this
 internalNutTrapDistance = ((cutoutXY - distanceBetweenInternalNutTraps)/2);
-topNutTrapDistance = (((cutoutXY + toleranceGap * 2) - distanceBetweenTopNutTraps)/2);
+topNutTrapDistance = ((cutoutXY - distanceBetweenTopNutTraps)/2);
 
 // Set to true to orient the pieces to output for printing
 orientForPrinting = false;
@@ -49,12 +52,24 @@ orientForPrinting = false;
 
 if( !orientForPrinting )
 {
+    mountToView();
+}
+else
+{
+    mountToPrint();
+}
+
+/** Reusable modules below here **/
+
+module mountToView()
+{
     mainUnit();
     baseCorners();
     top();
     topCorners();
 }
-else
+
+module mountToPrint()
 {
     mainUnit();
     baseCorners();
@@ -67,8 +82,6 @@ else
         }
     }
 }
-
-/** Reusable modules below here **/
 
 module mainUnit()
 {
@@ -358,12 +371,12 @@ module m4Nut()
 
 module m4HeadCutout()
 {
-    cylinder(h = 4.2, r = 3.8, $fn=256);
+    cylinder(h = 4.2, r = 3.8, $fn=circleSides);
 }
 
 module m4ThroughHole()
 {
-    cylinder( r=2.1, h=20, center=false, $fn=256);
+    cylinder( r=2.1, h=20, center=false, $fn=circleSides);
 }
 
 // An internal nut trap will go 2.1mm deeper than necessary to make sure it's recessed enough to allow room for the bolt to be screwed in without boring into the motor body
@@ -374,5 +387,75 @@ module m3InternalNut()
 
 module m3ThroughHole()
 {
-    cylinder( r=1.6, h=20, center=false, $fn=256);
+    cylinder( r=1.6, h=20, center=false, $fn=circleSides);
+}
+
+module m3HeadCutout()
+{
+    cylinder(h = 3.4, r = 3.15, $fn=circleSides);
+}
+
+// A spacer to serve as a placeholder for m3 hole placement
+module m3Spacer( height )
+{
+    radius = 1.6;
+    difference()
+    {
+        {
+            cylinder( r=(radius + 1.9), h=height, center=false, $fn=circleSides);
+        }
+        {
+            cylinder( r=radius, h=height, center=false, $fn=circleSides);
+        }
+    }
+}
+
+module connectedM3ThroughHoles( xDistance, yDistance )
+{
+    m3ThroughHole();
+    translate( [xDistance, yDistance, 0] )
+    {
+        m3ThroughHole();
+    }
+
+}
+
+module connectedM3Spacers( height, xDistance, yDistance )
+{
+    if( yDistance < 1)
+    {
+        difference()
+        {
+            {
+                union()
+                {
+                    m3Spacer( height );
+                    translate( [xDistance, yDistance, 0] )
+                    {
+                        m3Spacer( height );
+                    }
+                    translate( [0, (-1 * (7/2)), 0] )
+                    {
+                        cube( [xDistance, 7, height] ); 
+                    }
+                }
+            }
+            {
+                translate( [0, 0, -10] )
+                {
+                    connectedM3ThroughHoles( xDistance, yDistance );
+                }
+            }
+        }
+        
+        
+    }
+    else
+    {
+        translate( [(-1 * (6/2)), 0, 0] )
+        {
+            cube( [(height + 3.2), yDistance, height] );
+        }
+    }
+    
 }
