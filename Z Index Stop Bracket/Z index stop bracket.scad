@@ -16,14 +16,14 @@ extraThickness = 0;
 extraShelfHeight = 0.6;
 
 // Add some space to the valley between the shelf risers for tolerance
-// extraGulfWidth = 0;
-extraGulfWidth = 0.2;
+extraGulfWidth = 0;
+// extraGulfWidth = 0.2;
 
 // Whether or not the nut trap should be rendered
 renderNutTrap = true;
 
 // Determine the side of the piece that contains the nut trap. Set to false for "left"
-nutTrapRight = true;
+nutTrapRight = false;
 
 // Turn bolt cutouts into a module so they can be reused
 module boltCutouts()
