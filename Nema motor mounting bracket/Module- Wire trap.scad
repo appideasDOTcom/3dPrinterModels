@@ -18,12 +18,25 @@ wtTopNeckHeight = 1.3;
 wtBodyHeight = 8;
 wtBodyThickness = 4;
 
-union()
+renderTop = false;
+
+if( renderTop )
 {
-    renderTopBase();
-    topWireTrapNeck();
-    wiretrapBody();
+    union()
+    {
+        renderTopBase();
+        topWireTrapNeck();
+        wiretrapBody();
+    }
 }
+else
+{
+    union()
+    {
+        renderSideBase();
+    }
+}
+
 
 
 module wiretrapBody()
@@ -157,6 +170,11 @@ module topWireTrapNeck()
     
 }
 
+module renderSideBase()
+{
+    #fullSideBase();
+}
+
 module renderTopBase()
 {
     difference()
@@ -170,6 +188,23 @@ module renderTopBase()
     }
 }
 
+
+module fullSideBase()
+{
+    translate( [-1 * thickness, internalNutTrapDistance, height/2] )
+    {
+        rotate( [-90, 0, 0] )
+        rotate( [0, -90, 0] )
+        {
+            sideBase();
+            translate( [0, 0, 3.4] )
+            {
+                sideBase();
+            }
+        }
+    }
+}
+
 module fullTopBase()
 {
     translate( [(cutoutXY/2) - (wtOnTopBaseWidth/2), (cutoutXY + topPieceSupport), 0] )
@@ -179,15 +214,11 @@ module fullTopBase()
             rotate( [-90, 0, 0] )
             {
                 topBase();
-            }
-        }
-
-        // repeated to make an extra deep recess so that M3 bolt heads will be flush with the model surface
-        translate( [topNutTrapDistance - wtNutTrapOffset, 3.4, (height/2)] )
-        {
-            rotate( [-90, 0, 0] )
-            {
-                topBase();
+                // repeated to make an extra deep recess so that M3 bolt heads will be flush with the model surface
+                translate( [0, 0, 3.4] )
+                {
+                    topBase();
+                }
             }
         }
 
