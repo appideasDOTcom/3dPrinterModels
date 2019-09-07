@@ -48,15 +48,21 @@ topNutTrapDistance = ((cutoutXY - distanceBetweenTopNutTraps)/2);
 // Set to true to orient the pieces to output for printing
 orientForPrinting = false;
 
+// Set this to false to not render this model - typically when including this as a base module
+renderModel = true;
+
 /** Build the final piece(s) here **/
 
-if( !orientForPrinting )
+if( renderModel )
 {
-    mountToView();
-}
-else
-{
-    mountToPrint();
+    if( !orientForPrinting )
+    {
+        mountToView();
+    }
+    else
+    {
+        mountToPrint();
+    }
 }
 
 /** Reusable modules below here **/
@@ -467,4 +473,46 @@ module connectedM3Spacers( height, xDistance, yDistance )
         }
     }
     
+}
+
+// Create an "S" shaped curve for model strength on what would otherwise be a corner
+module essCurve( d, h )
+{
+  xDimension = d;
+  yDimension = d;
+  zDimension = h;
+
+  difference()
+    {
+      {
+        translate( [(-1 * (xDimension / 2)), (-1 * (yDimension / 2)), 0] )
+        {
+          cube( [xDimension, yDimension, zDimension] );
+        }
+      }
+      {
+        translate( [ 0, 0, -1 ] )
+        {
+          cube( [xDimension, yDimension, (zDimension + 2)] );
+
+          translate( [0, (-1 * yDimension), 0] )
+          {
+            cube( [xDimension, yDimension, (zDimension + 2)] );
+          }
+          translate( [(-1 * xDimension), 0, 0] )
+          {
+            cube( [xDimension, yDimension, (zDimension + 2)] );
+          }
+
+          linear_extrude( height=(zDimension + 2), twist=0, scale=[1, 1], center=false)
+          {
+            $fn=64;    //set sides to 64
+            circle(r=(xDimension / 2));
+          }
+          
+        }
+
+      }
+    
+  }
 }
