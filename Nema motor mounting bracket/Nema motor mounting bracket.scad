@@ -11,9 +11,6 @@ $fa = 1;
  // Render Quality: Minimum size
 $fs = 0.1;
 
-// Smoothness of circles. More sides = more render time, but smoother look
-circleSides = 64;
-
 // The X and Y dimensions od the motor. Added 0.2mm to the technically correct size for tolerance
 cutoutXY = 42.5;
 // How tall to print - or how wide the piece will be. This piece fits between the metal endcaps of the motor housing. The most common motor has a 20mm gap between the raised metal pieces, so you'll probably need that value or less
@@ -57,7 +54,7 @@ if( renderModel )
 {
     if( !orientForPrinting )
     {
-        mountToView();
+        %mountToView();
     }
     else
     {
@@ -377,12 +374,12 @@ module m4Nut()
 
 module m4HeadCutout()
 {
-    cylinder(h = 4.2, r = 3.8, $fn=circleSides);
+    cylinder(h = 4.2, r = 3.8 );
 }
 
 module m4ThroughHole()
 {
-    cylinder( r=2.1, h=20, center=false, $fn=circleSides);
+    cylinder( r=2.1, h=20, center=false );
 }
 
 // An internal nut trap will go 2.1mm deeper than necessary to make sure it's recessed enough to allow room for the bolt to be screwed in without boring into the motor body
@@ -393,25 +390,25 @@ module m3InternalNut()
 
 module m3ThroughHole()
 {
-    cylinder( r=1.6, h=20, center=false, $fn=circleSides);
+    cylinder( r=1.6, h=20, center=false );
 }
 
 module m3HeadCutout()
 {
-    cylinder(h = 3.4, r = 3.15, $fn=circleSides);
+    cylinder(h = 3.4, r = 3.15 );
 }
 
 // A spacer to serve as a placeholder for m3 hole placement
-module m3Spacer( height )
+module m3Spacer( height, extraBorder )
 {
     radius = 1.6;
     difference()
     {
         {
-            cylinder( r=(radius + 2.9), h=height, center=false, $fn=circleSides);
+            cylinder( r=(radius + 2.9 + (extraBorder/2)), h=height, center=false );
         }
         {
-            cylinder( r=radius, h=height, center=false, $fn=circleSides);
+            cylinder( r=radius, h=height, center=false );
         }
     }
 }
@@ -444,10 +441,10 @@ module connectedM3Spacers( height, xDistance, yDistance )
             {
                 union()
                 {
-                    m3Spacer( height );
+                    m3Spacer( height, 2 );
                     translate( [xDistance, yDistance, 0] )
                     {
-                        m3Spacer( height );
+                        m3Spacer( height, 2 );
                     }
                     translate( [0, (-1 * (9/2)), 0] )
                     {

@@ -2,6 +2,8 @@
 
 include <Nema motor mounting bracket.scad>
 
+baseCornerRoundness = 1.2;
+
 module topBase()
 {
     connectedM3Spacers( 4.2, distanceBetweenTopNutTraps, 0 );
@@ -28,23 +30,24 @@ module cornerBase()
 
 module cornerSide()
 {
-    baseCornerRoundness = 1.2;
-    sideLength = internalNutTrapDistance + thickness + 2.8 + 5.2 + 0;
+    
+    sideLength = internalNutTrapDistance + thickness + 2.8 + 5.2;
+    lengthOffset = 1;
 
     difference()
     {
         {
             union()
             {
-                m3Spacer( 4.2 );
+                m3Spacer( 4.2, 0 );
                 translate( [-7.5, (-1 * (internalNutTrapDistance + thickness + 3.7)), -0.1] )
                 {
                     hull()
                     {
                         {
-                            translate( [baseCornerRoundness/2, 0, baseCornerRoundness/2] )
+                            translate( [baseCornerRoundness/2, lengthOffset, baseCornerRoundness/2] )
                             {
-                                cube( [15 - baseCornerRoundness, sideLength, 4.2 - (baseCornerRoundness/2) ] );
+                                %cube( [15 - baseCornerRoundness, sideLength - lengthOffset, 4.2 - (baseCornerRoundness/2) ] );
                             }
                         }
                         {
@@ -53,22 +56,40 @@ module cornerSide()
                                 translate( [baseCornerRoundness/2, (sideLength), baseCornerRoundness/2] )
                                 {
                                     cylinder( d=baseCornerRoundness, h = 3.7 );
-                                    sphere( d=baseCornerRoundness, $fn=circleSides );
+                                    sphere( d=baseCornerRoundness );
                                 }
                                 translate( [15 - (baseCornerRoundness/2), (sideLength), baseCornerRoundness/2] )
                                 {
                                     cylinder( d=baseCornerRoundness, h = 3.7 );
-                                    sphere( d=baseCornerRoundness, $fn=circleSides );
+                                    sphere( d=baseCornerRoundness );
                                 }
-                                translate( [15 - (baseCornerRoundness/2), 0, baseCornerRoundness/2] )
+                                translate( [15 - (baseCornerRoundness/2), lengthOffset, 0] )
                                 {
-                                    cylinder( d=baseCornerRoundness, h = 3.7 );
-                                    sphere( d=baseCornerRoundness, $fn=circleSides );
+                                    translate( [0, -1 * (baseCornerRoundness/2), baseCornerRoundness] )
+                                    {
+                                        cube([(baseCornerRoundness/2), baseCornerRoundness/2, 3.2 ]);
+                                    }
+                                    translate( [0, -1 * (baseCornerRoundness/2), (baseCornerRoundness/2)] )
+                                    {
+                                        rotate( [-90, 0, 0] )
+                                        {
+                                            cylinder( d=baseCornerRoundness, h = 3.7 + (baseCornerRoundness/2) );
+                                        }
+                                    }
                                 }
-                                translate( [(baseCornerRoundness/2), 0, baseCornerRoundness/2] )
+                                translate( [(baseCornerRoundness/2), lengthOffset, 0] )
                                 {
-                                    cylinder( d=baseCornerRoundness, h = 3.7 );
-                                    sphere( d=baseCornerRoundness, $fn=circleSides );
+                                    translate( [-1 * (baseCornerRoundness/2), -1 * (baseCornerRoundness/2), baseCornerRoundness] )
+                                    {
+                                        cube([(baseCornerRoundness/2), baseCornerRoundness/2, 3.2 ]);
+                                    }
+                                    translate( [0, -1 * (baseCornerRoundness/2), (baseCornerRoundness/2)] )
+                                    {
+                                        rotate( [-90, 0, 0] )
+                                        {
+                                            cylinder( d=baseCornerRoundness, h = 3.7 + (baseCornerRoundness/2) );
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -11,14 +11,17 @@ wtNutTrapOffset = (cutoutXY/2) - (wtOnTopBaseWidth/2);
 
 wtBasePlateCornerDiameter = 3;
 
-wtTopNeckWidth = 15;
+wtTopNeckWidth = 18;
 wtTopNeckDepth = 5;
 wtTopNeckHeight = 1.3;
 
 wtBodyHeight = 8;
 wtBodyThickness = 4;
 
-renderTop = false;
+wtBasePlateExtraWidth = 9;
+extraBackBaseOffset = 1.5; // fix center when extra width is added
+
+renderTop = true;
 
 if( renderTop )
 {
@@ -41,7 +44,7 @@ else
 
 module wiretrapBody()
 {
-    translate( [distanceBetweenTopNutTraps + wtBasePlateCornerDiameter - 1.3, cutoutXY + topPieceSupport + wtBaseHeight + 3.4 + 1.3, 0] )
+    translate( [distanceBetweenTopNutTraps + wtBasePlateCornerDiameter - 1.3 - extraBackBaseOffset, cutoutXY + topPieceSupport + wtBaseHeight + 3.4 + 1.3, 0] )
     {
         difference()
         {
@@ -59,7 +62,7 @@ module wiretrapBody()
 
                         translate( [0.5, wtBodyHeight + 0.5, 0.5] )
                         {
-                            sphere( r=0.5, $fn=circleSides);
+                            sphere( r=0.5 );
                         }
 
                         translate( [0, 0, wtTopNeckDepth - 0.5] )
@@ -69,7 +72,7 @@ module wiretrapBody()
 
                         translate( [0.5, wtBodyHeight + 0.5, wtTopNeckDepth - 0.5] )
                         {
-                            sphere( r=0.5, $fn=circleSides);
+                            sphere( r=0.5 );
                         }
 
                         translate( [wtTopNeckWidth - 0.5, 0, wtTopNeckDepth - 0.5] )
@@ -79,7 +82,7 @@ module wiretrapBody()
 
                         translate( [wtTopNeckWidth - 0.5, wtBodyHeight + 0.5, wtTopNeckDepth - 0.5] )
                         {
-                            sphere( r=0.5, $fn=circleSides);
+                            sphere( r=0.5 );
                         }
 
                         translate( [wtTopNeckWidth - 0.5, 0, 0] )
@@ -89,13 +92,13 @@ module wiretrapBody()
 
                         translate( [wtTopNeckWidth - 0.5, wtBodyHeight + 0.5, 0.5] )
                         {
-                            sphere( r=0.5, $fn=circleSides);
+                            sphere( r=0.5 );
                         }
                     }
                 }
             }
             {
-                translate( [wtBodyThickness/2, wtBodyThickness/1.3, 0] )
+                translate( [wtBodyThickness/2, wtBodyThickness/1.3 - 0.4, 0] )
                 {
                     cube( [wtTopNeckWidth - wtBodyThickness, wtBodyHeight - wtBodyThickness, wtTopNeckDepth] );
                 }
@@ -107,7 +110,7 @@ module wiretrapBody()
 
 module topWireTrapNeck()
 {
-    translate( [distanceBetweenTopNutTraps + wtBasePlateCornerDiameter - 1.3, cutoutXY + topPieceSupport + wtBaseHeight + 3.4, 0] )
+    translate( [distanceBetweenTopNutTraps + wtBasePlateCornerDiameter - 1.3 - extraBackBaseOffset, cutoutXY + topPieceSupport + wtBaseHeight + 3.4, 0] )
     {
         
         cube( [wtTopNeckWidth, wtTopNeckHeight, wtTopNeckDepth] );
@@ -172,7 +175,7 @@ module topWireTrapNeck()
 
 module renderSideBase()
 {
-    #fullSideBase();
+    fullSideBase();
 }
 
 module renderTopBase()
@@ -222,27 +225,33 @@ module fullTopBase()
             }
         }
 
-        translate( [-3.5 + (wtBasePlateCornerDiameter/2), 0, wtBasePlateCornerDiameter/2] )
+        translate( [-1 * (wtBasePlateExtraWidth/2) + (wtBasePlateCornerDiameter/2), 0, wtBasePlateCornerDiameter/2] )
         {
+            // Clumsily filling a hole left over from resizing the base. This will need to change is other size change
+            translate( [(wtBasePlateExtraWidth - 7 + 1), 0, 11.8] )
+            {
+                cube( [distanceBetweenTopNutTraps, 7.6, (wtBasePlateExtraWidth - 7)] );
+            }
+
             hull()
             {
                 {
-                    cube( [(distanceBetweenTopNutTraps + 7 - wtBasePlateCornerDiameter), wtBaseHeight + 3.4, (height/2) - (wtBasePlateCornerDiameter/2)] );
+                    %cube( [(distanceBetweenTopNutTraps + wtBasePlateExtraWidth - wtBasePlateCornerDiameter), wtBaseHeight + 3.4, (height/2) - (wtBasePlateCornerDiameter/2)] );
                 }
                 {
                     union()
                     {
-                        translate( [(-1 * (wtBasePlateCornerDiameter/2)) - 1, 0, (height/2) - (wtBasePlateCornerDiameter)] )
+                        translate( [-1 * (wtBasePlateExtraWidth - 7 + 0.5), 0, (height/2) - (wtBasePlateCornerDiameter + (wtBasePlateCornerDiameter/2))] )
                         {
-                            cube( [(wtBasePlateCornerDiameter/2), wtBaseHeight + 3.4, (wtBasePlateCornerDiameter/2)] );
+                            cube( [(wtBasePlateExtraWidth - 7 + 0.5), wtBaseHeight + 3.4, wtBasePlateCornerDiameter] );
                         }
 
-                        translate( [(distanceBetweenTopNutTraps + 8 - wtBasePlateCornerDiameter), 0, (height/2) - (wtBasePlateCornerDiameter)] )
+                        translate( [distanceBetweenTopNutTraps + (wtBasePlateExtraWidth - 3), 0, (height/2) - (wtBasePlateCornerDiameter + (wtBasePlateCornerDiameter/2))] )
                         {
-                            cube( [(wtBasePlateCornerDiameter/2), wtBaseHeight + 3.4, (wtBasePlateCornerDiameter/2)] );
+                            cube( [(wtBasePlateExtraWidth - 7 + 0.5), wtBaseHeight + 3.4, wtBasePlateCornerDiameter] );
                         }
 
-                        translate( [-1, wtBaseHeight + 3.4, 0] )
+                        translate( [-1 * (wtBasePlateExtraWidth - 7), wtBaseHeight + 3.4, 0] )
                         {
                             rotate( [90, 0, 0] )
                             {
@@ -250,7 +259,7 @@ module fullTopBase()
                             }
                         }
 
-                        translate( [(distanceBetweenTopNutTraps + 8 - wtBasePlateCornerDiameter), wtBaseHeight + 3.4, 0] )
+                        translate( [(distanceBetweenTopNutTraps + (wtBasePlateExtraWidth - 3) + (wtBasePlateExtraWidth - 7)), wtBaseHeight + 3.4, 0] )
                         {
                             rotate( [90, 0, 0] )
                             {
