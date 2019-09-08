@@ -18,13 +18,14 @@ wtBasePlateCornerDiameter = 3;
 
 wtTopNeckWidth = 18;
 wtTopNeckDepth = 5;
-wtTopNeckHeight = 1.3;
+
+wtTopNeckHeight = 7.3;
 
 wtBodyHeight = 8;
 wtBodyThickness = 4;
 
 wtBasePlateExtraWidth = 9;
-extraBackBaseOffset = 1.5; // fix center when extra width is added
+extraBackBaseOffset = -4.5; // fix center when extra "wtTopNeckHeight" is added
 
 renderTop = true;
 
@@ -49,7 +50,7 @@ else
 
 module wiretrapBody()
 {
-    translate( [distanceBetweenTopNutTraps + wtBasePlateCornerDiameter - 1.3 - extraBackBaseOffset, cutoutXY + topPieceSupport + wtBaseHeight + 3.4 + 1.3, 0] )
+    translate( [distanceBetweenTopNutTraps + wtBasePlateCornerDiameter - wtTopNeckHeight - extraBackBaseOffset, cutoutXY + topPieceSupport + wtBaseHeight + 3.4 + wtTopNeckHeight, 0] )
     {
         difference()
         {
@@ -115,7 +116,7 @@ module wiretrapBody()
 
 module topWireTrapNeck()
 {
-    translate( [distanceBetweenTopNutTraps + wtBasePlateCornerDiameter - 1.3 - extraBackBaseOffset, cutoutXY + topPieceSupport + wtBaseHeight + 3.4, 0] )
+    translate( [distanceBetweenTopNutTraps + wtBasePlateCornerDiameter - wtTopNeckHeight - extraBackBaseOffset, cutoutXY + topPieceSupport + wtBaseHeight + 3.4, 0] )
     {
         
         cube( [wtTopNeckWidth, wtTopNeckHeight, wtTopNeckDepth] );

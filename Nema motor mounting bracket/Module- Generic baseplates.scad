@@ -129,8 +129,7 @@ module cornerSide()
                     m3ThroughHole();
                 }
 
-                // -3.5 brings the cutout to the surface. positive values after cut into the body
-                translate( [0, 0, -3.5 + 1.0 ] )
+                translate( [0, 0, -3.5 ] )
                 {
                     m3HeadCutout();
                 }
