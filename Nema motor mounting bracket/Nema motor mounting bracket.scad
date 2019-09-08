@@ -43,7 +43,7 @@ internalNutTrapDistance = ((cutoutXY - distanceBetweenInternalNutTraps)/2);
 topNutTrapDistance = ((cutoutXY - distanceBetweenTopNutTraps)/2);
 
 // Set to true to orient the pieces to output for printing
-orientForPrinting = true;
+orientForPrinting = false;
 
 // Set this to false to not render this model - typically when including this as a base module
 renderModel = true;

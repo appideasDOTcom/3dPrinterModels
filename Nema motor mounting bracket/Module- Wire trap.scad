@@ -241,7 +241,7 @@ module fullTopBase()
             hull()
             {
                 {
-                    %cube( [(distanceBetweenTopNutTraps + wtBasePlateExtraWidth - wtBasePlateCornerDiameter), wtBaseHeight + 3.4, (height/2) - (wtBasePlateCornerDiameter/2)] );
+                    cube( [(distanceBetweenTopNutTraps + wtBasePlateExtraWidth - wtBasePlateCornerDiameter), wtBaseHeight + 3.4, (height/2) - (wtBasePlateCornerDiameter/2)] );
                 }
                 {
                     union()
@@ -288,7 +288,12 @@ module fullTopBoltCutouts()
         rotate( [90, 0, 0] )
         {
             connectedM3ThroughHoles( distanceBetweenTopNutTraps, 0 );
-            translate( [0, 0, 2.4] )
+            // Need to sink a little deeper to use an M3x8mm bolt
+            translate( [0, 0, 3.4] )
+            {
+                connectedM3HeadCutouts( distanceBetweenTopNutTraps, 0 );
+            }
+            translate( [0, 0, 2.2] )
             {
                 connectedM3HeadCutouts( distanceBetweenTopNutTraps, 0 );
             }
