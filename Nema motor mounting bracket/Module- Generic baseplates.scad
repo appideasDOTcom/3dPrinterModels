@@ -8,6 +8,9 @@ include <Nema motor mounting bracket.scad>
 
 baseCornerRoundness = 1.2;
 
+// The basic thickness of the baseplates. cornerRoundness will be added to the total thickness on printing
+bpPlatformHeightBase = 5.7;
+
 module topBase()
 {
     connectedM3Spacers( 4.2, distanceBetweenTopNutTraps, 0 );
@@ -43,7 +46,9 @@ module cornerSide()
         {
             union()
             {
-                m3Spacer( 4.2, 0 );
+                
+
+                m3Spacer( bpPlatformHeightBase, 0 );
                 translate( [-7.5, (-1 * (internalNutTrapDistance + thickness + 3.7)), -0.1] )
                 {
                     hull()
@@ -51,12 +56,12 @@ module cornerSide()
                         {
                             translate( [baseCornerRoundness/2, lengthOffset, baseCornerRoundness/2] )
                             {
-                                cube( [15 - baseCornerRoundness, sideLength - lengthOffset, 4.2 - (baseCornerRoundness/2) ] );
+                                cube( [15 - baseCornerRoundness, sideLength - lengthOffset, bpPlatformHeightBase - (baseCornerRoundness/2) ] );
                             }
                         }
                         {
-                            useHeight = 3.7;
-                            useHalfHeight = 3.7/2;
+                            useHeight = bpPlatformHeightBase - 0.5;
+                            useHalfHeight = useHeight/2;
 
                             union()
                             {
@@ -87,13 +92,13 @@ module cornerSide()
                                 }
 
 
-                                translate( [15 - (baseCornerRoundness/2), lengthOffset, 0] )
+                                translate( [15 - (baseCornerRoundness/2), lengthOffset, (bpPlatformHeightBase - 4.2)] )
                                 {
                                     translate( [0, -1 * (baseCornerRoundness/2), baseCornerRoundness] )
                                     {
                                         cube([(baseCornerRoundness/2), baseCornerRoundness/2, 3.2 ]);
                                     }
-                                    translate( [0, -1 * (baseCornerRoundness/2), (baseCornerRoundness/2)] )
+                                    translate( [0, -1 * (baseCornerRoundness/2), (baseCornerRoundness/2 - (bpPlatformHeightBase - 4.2))] )
                                     {
                                         rotate( [-90, 0, 0] )
                                         {
@@ -103,7 +108,7 @@ module cornerSide()
                                 }
                                 translate( [(baseCornerRoundness/2), lengthOffset, 0] )
                                 {
-                                    translate( [-1 * (baseCornerRoundness/2), -1 * (baseCornerRoundness/2), baseCornerRoundness] )
+                                    translate( [-1 * (baseCornerRoundness/2), -1 * (baseCornerRoundness/2), baseCornerRoundness + (bpPlatformHeightBase - 4.2)] )
                                     {
                                         cube([(baseCornerRoundness/2), baseCornerRoundness/2, 3.2 ]);
                                     }

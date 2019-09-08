@@ -54,7 +54,7 @@ if( renderModel )
 {
     if( !orientForPrinting )
     {
-        mountToView();
+        %mountToView();
     }
     else
     {
