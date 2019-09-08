@@ -1,5 +1,9 @@
 //!OpenSCAD
-
+/**
+ * A corner-mount module for the Universal Nema Mounting Bracket that provides an easy Z index adjustment mechanism
+ *
+ * costmo: 2019-09-04
+ */
 include <Nema motor mounting bracket.scad>
 include <Module- Generic baseplates.scad>
 
@@ -42,9 +46,9 @@ module renderPlatform()
                         cube( [cutoutXY, cutoutXY, lsaWidth + baseCornerRoundness] );
                     }
 
-                    // m4Nut() goes a little deeper than we need
-                    // 0.6 brings the cutout to the model surface
-                    translate( [10, lsaHeight + 0.6 + 1.4, (lsaWidth/2)] )
+                    // m4Nut() goes a bit deeper than we need
+                    // 0.6 brings the cutout to the model surface. The next number is how much further we want to pull it above the surface.
+                    translate( [10, lsaHeight + 0.6 + 1.2, (lsaWidth/2)] )
                     {
                         rotate( [90, 0, 0] )
                         {

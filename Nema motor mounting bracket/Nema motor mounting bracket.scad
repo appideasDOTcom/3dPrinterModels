@@ -43,7 +43,7 @@ internalNutTrapDistance = ((cutoutXY - distanceBetweenInternalNutTraps)/2);
 topNutTrapDistance = ((cutoutXY - distanceBetweenTopNutTraps)/2);
 
 // Set to true to orient the pieces to output for printing
-orientForPrinting = false;
+orientForPrinting = true;
 
 // Set this to false to not render this model - typically when including this as a base module
 renderModel = true;
@@ -54,7 +54,7 @@ if( renderModel )
 {
     if( !orientForPrinting )
     {
-        %mountToView();
+        mountToView();
     }
     else
     {
@@ -369,7 +369,7 @@ module roundedBodyCorners()
 
 module m4Nut()
 {
-    cylinder(h = 4.6, r = 4.1, $fn=6);
+    cylinder(h = 4.6, r = 4.45, $fn=6);
 }
 
 module m4HeadCutout()
@@ -379,7 +379,7 @@ module m4HeadCutout()
 
 module m4ThroughHole()
 {
-    cylinder( r=2.1, h=20, center=false );
+    cylinder( r=2.5, h=20, center=false );
 }
 
 // An internal nut trap will go 2.1mm deeper than necessary to make sure it's recessed enough to allow room for the bolt to be screwed in without boring into the motor body
@@ -390,7 +390,7 @@ module m3InternalNut()
 
 module m3ThroughHole()
 {
-    cylinder( r=1.6, h=20, center=false );
+    cylinder( r=1.9, h=20, center=false );
 }
 
 module m3HeadCutout()
@@ -401,11 +401,11 @@ module m3HeadCutout()
 // A spacer to serve as a placeholder for m3 hole placement
 module m3Spacer( height, extraBorder )
 {
-    radius = 1.6;
+    radius = 1.9;
     difference()
     {
         {
-            cylinder( r=(radius + 2.9 + (extraBorder/2)), h=height, center=false );
+            cylinder( r=(radius + 2.6 + (extraBorder/2)), h=height, center=false );
         }
         {
             cylinder( r=radius, h=height, center=false );

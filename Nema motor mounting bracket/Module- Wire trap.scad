@@ -1,4 +1,9 @@
 //!OpenSCAD
+/**
+ * A top-mount wire trap module for the Universal Nema Mounting Bracket
+ *
+ * costmo: 2019-09-04
+ */
 
 include <Nema motor mounting bracket.scad>
 include <Module- Generic baseplates.scad>

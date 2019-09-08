@@ -1,5 +1,9 @@
 //!OpenSCAD
-
+/**
+ * Generic baseplates to use as the foundation for Universal Nema Mounting Bracket modules
+ *
+ * costmo: 2019-09-04
+ */
 include <Nema motor mounting bracket.scad>
 
 baseCornerRoundness = 1.2;
@@ -47,22 +51,42 @@ module cornerSide()
                         {
                             translate( [baseCornerRoundness/2, lengthOffset, baseCornerRoundness/2] )
                             {
-                                %cube( [15 - baseCornerRoundness, sideLength - lengthOffset, 4.2 - (baseCornerRoundness/2) ] );
+                                cube( [15 - baseCornerRoundness, sideLength - lengthOffset, 4.2 - (baseCornerRoundness/2) ] );
                             }
                         }
                         {
+                            useHeight = 3.7;
+                            useHalfHeight = 3.7/2;
+
                             union()
                             {
                                 translate( [baseCornerRoundness/2, (sideLength), baseCornerRoundness/2] )
                                 {
-                                    cylinder( d=baseCornerRoundness, h = 3.7 );
+                                    cylinder( d=baseCornerRoundness, h = useHeight );
                                     sphere( d=baseCornerRoundness );
                                 }
+
+                                // make the endcaps slope at > 45 angle so we can print from any orientation without supports
+                                translate( [baseCornerRoundness/2 + useHeight, (sideLength) + useHeight/3, (baseCornerRoundness/2) + (useHalfHeight)] )
+                                {
+                                    cylinder( d=baseCornerRoundness, h = useHalfHeight );
+                                    sphere( d=baseCornerRoundness );
+                                }
+
+
                                 translate( [15 - (baseCornerRoundness/2), (sideLength), baseCornerRoundness/2] )
                                 {
-                                    cylinder( d=baseCornerRoundness, h = 3.7 );
+                                    cylinder( d=baseCornerRoundness, h = useHeight );
                                     sphere( d=baseCornerRoundness );
                                 }
+
+                                translate( [15 - (baseCornerRoundness/2) - useHeight, (sideLength) + useHeight/3, baseCornerRoundness/2 + (useHalfHeight)] )
+                                {
+                                    cylinder( d=baseCornerRoundness, h = useHalfHeight );
+                                    sphere( d=baseCornerRoundness );
+                                }
+
+
                                 translate( [15 - (baseCornerRoundness/2), lengthOffset, 0] )
                                 {
                                     translate( [0, -1 * (baseCornerRoundness/2), baseCornerRoundness] )
@@ -73,7 +97,7 @@ module cornerSide()
                                     {
                                         rotate( [-90, 0, 0] )
                                         {
-                                            cylinder( d=baseCornerRoundness, h = 3.7 + (baseCornerRoundness/2) );
+                                            cylinder( d=baseCornerRoundness, h = useHeight + (baseCornerRoundness/2) );
                                         }
                                     }
                                 }
@@ -87,7 +111,7 @@ module cornerSide()
                                     {
                                         rotate( [-90, 0, 0] )
                                         {
-                                            cylinder( d=baseCornerRoundness, h = 3.7 + (baseCornerRoundness/2) );
+                                            cylinder( d=baseCornerRoundness, h = useHeight + (baseCornerRoundness/2) );
                                         }
                                     }
                                 }
