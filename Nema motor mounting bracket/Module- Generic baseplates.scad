@@ -11,6 +11,8 @@ baseCornerRoundness = 1.2;
 // The basic thickness of the baseplates. cornerRoundness will be added to the total thickness on printing
 bpPlatformHeightBase = 5.7;
 
+cornerBaseExtensionLength = (bpPlatformHeightBase - 4.2);
+
 module topBase()
 {
     connectedM3Spacers( 4.2, distanceBetweenTopNutTraps, 0 );
@@ -46,77 +48,78 @@ module cornerSide()
         {
             union()
             {
-                
-
-                m3Spacer( bpPlatformHeightBase, 0 );
-                translate( [-7.5, (-1 * (internalNutTrapDistance + thickness + 3.7)), -0.1] )
+                translate( [0, cornerBaseExtensionLength, 0] )
                 {
-                    hull()
+                    m3Spacer( bpPlatformHeightBase, 0 );
+                    translate( [-7.5, (-1 * (internalNutTrapDistance + thickness + 3.7)), -0.1] )
                     {
+                        hull()
                         {
-                            translate( [baseCornerRoundness/2, lengthOffset, baseCornerRoundness/2] )
                             {
-                                cube( [15 - baseCornerRoundness, sideLength - lengthOffset, bpPlatformHeightBase - (baseCornerRoundness/2) ] );
+                                translate( [baseCornerRoundness/2, lengthOffset, baseCornerRoundness/2] )
+                                {
+                                    cube( [15 - baseCornerRoundness, sideLength - lengthOffset, bpPlatformHeightBase - (baseCornerRoundness/2) ] );
+                                }
                             }
-                        }
-                        {
-                            useHeight = bpPlatformHeightBase - 0.5;
-                            useHalfHeight = useHeight/2;
-
-                            union()
                             {
-                                translate( [baseCornerRoundness/2, (sideLength), baseCornerRoundness/2] )
+                                useHeight = bpPlatformHeightBase - 0.5;
+                                useHalfHeight = useHeight/2;
+
+                                union()
                                 {
-                                    cylinder( d=baseCornerRoundness, h = useHeight );
-                                    sphere( d=baseCornerRoundness );
-                                }
-
-                                // make the endcaps slope at > 45 angle so we can print from any orientation without supports
-                                translate( [baseCornerRoundness/2 + useHeight, (sideLength) + useHeight/3, (baseCornerRoundness/2) + (useHalfHeight)] )
-                                {
-                                    cylinder( d=baseCornerRoundness, h = useHalfHeight );
-                                    sphere( d=baseCornerRoundness );
-                                }
-
-
-                                translate( [15 - (baseCornerRoundness/2), (sideLength), baseCornerRoundness/2] )
-                                {
-                                    cylinder( d=baseCornerRoundness, h = useHeight );
-                                    sphere( d=baseCornerRoundness );
-                                }
-
-                                translate( [15 - (baseCornerRoundness/2) - useHeight, (sideLength) + useHeight/3, baseCornerRoundness/2 + (useHalfHeight)] )
-                                {
-                                    cylinder( d=baseCornerRoundness, h = useHalfHeight );
-                                    sphere( d=baseCornerRoundness );
-                                }
-
-
-                                translate( [15 - (baseCornerRoundness/2), lengthOffset, (bpPlatformHeightBase - 4.2)] )
-                                {
-                                    translate( [0, -1 * (baseCornerRoundness/2), baseCornerRoundness] )
+                                    translate( [baseCornerRoundness/2, (sideLength), baseCornerRoundness/2] )
                                     {
-                                        cube([(baseCornerRoundness/2), baseCornerRoundness/2, 3.2 ]);
+                                        cylinder( d=baseCornerRoundness, h = useHeight );
+                                        sphere( d=baseCornerRoundness );
                                     }
-                                    translate( [0, -1 * (baseCornerRoundness/2), (baseCornerRoundness/2 - (bpPlatformHeightBase - 4.2))] )
+
+                                    // make the endcaps slope at > 45 angle so we can print from any orientation without supports
+                                    translate( [baseCornerRoundness/2 + useHeight, (sideLength) + useHeight/3, (baseCornerRoundness/2) + (useHalfHeight)] )
                                     {
-                                        rotate( [-90, 0, 0] )
+                                        cylinder( d=baseCornerRoundness, h = useHalfHeight );
+                                        sphere( d=baseCornerRoundness );
+                                    }
+
+
+                                    translate( [15 - (baseCornerRoundness/2), (sideLength), baseCornerRoundness/2] )
+                                    {
+                                        cylinder( d=baseCornerRoundness, h = useHeight );
+                                        sphere( d=baseCornerRoundness );
+                                    }
+
+                                    translate( [15 - (baseCornerRoundness/2) - useHeight, (sideLength) + useHeight/3, baseCornerRoundness/2 + (useHalfHeight)] )
+                                    {
+                                        cylinder( d=baseCornerRoundness, h = useHalfHeight );
+                                        sphere( d=baseCornerRoundness );
+                                    }
+
+
+                                    translate( [15 - (baseCornerRoundness/2), lengthOffset - cornerBaseExtensionLength, (bpPlatformHeightBase - 4.2)] )
+                                    {
+                                        translate( [0, -1 * (baseCornerRoundness/2), baseCornerRoundness] )
                                         {
-                                            cylinder( d=baseCornerRoundness, h = useHeight + (baseCornerRoundness/2) );
+                                            cube([(baseCornerRoundness/2), baseCornerRoundness/2, 3.2 ]);
+                                        }
+                                        translate( [0, -1 * (baseCornerRoundness/2), (baseCornerRoundness/2 - (bpPlatformHeightBase - 4.2))] )
+                                        {
+                                            rotate( [-90, 0, 0] )
+                                            {
+                                                cylinder( d=baseCornerRoundness, h = useHeight + (baseCornerRoundness/2) );
+                                            }
                                         }
                                     }
-                                }
-                                translate( [(baseCornerRoundness/2), lengthOffset, 0] )
-                                {
-                                    translate( [-1 * (baseCornerRoundness/2), -1 * (baseCornerRoundness/2), baseCornerRoundness + (bpPlatformHeightBase - 4.2)] )
+                                    translate( [(baseCornerRoundness/2), lengthOffset - cornerBaseExtensionLength, 0] )
                                     {
-                                        cube([(baseCornerRoundness/2), baseCornerRoundness/2, 3.2 ]);
-                                    }
-                                    translate( [0, -1 * (baseCornerRoundness/2), (baseCornerRoundness/2)] )
-                                    {
-                                        rotate( [-90, 0, 0] )
+                                        translate( [-1 * (baseCornerRoundness/2), -1 * (baseCornerRoundness/2), baseCornerRoundness + (bpPlatformHeightBase - 4.2)] )
                                         {
-                                            cylinder( d=baseCornerRoundness, h = useHeight + (baseCornerRoundness/2) );
+                                            cube([(baseCornerRoundness/2), baseCornerRoundness/2, 3.2 ]);
+                                        }
+                                        translate( [0, -1 * (baseCornerRoundness/2), (baseCornerRoundness/2)] )
+                                        {
+                                            rotate( [-90, 0, 0] )
+                                            {
+                                                cylinder( d=baseCornerRoundness, h = useHeight + (baseCornerRoundness/2) );
+                                            }
                                         }
                                     }
                                 }
@@ -129,12 +132,12 @@ module cornerSide()
         {
             union()
             {
-                translate( [0, 0, -5] )
+                translate( [0, cornerBaseExtensionLength, -5] )
                 {
                     m3ThroughHole();
                 }
 
-                translate( [0, 0, -3.5 ] )
+                translate( [0, cornerBaseExtensionLength, -3.5 ] )
                 {
                     m3HeadCutout();
                 }

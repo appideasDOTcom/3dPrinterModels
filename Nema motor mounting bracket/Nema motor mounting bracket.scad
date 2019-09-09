@@ -27,7 +27,7 @@ topPieceSupport = 7;
 
 // How thick/tall the top piece will be in total
 topThickness = (topBoltCutoutHeight + topPieceSupport);
-// Add a small gap between pieces for better fit
+// Add a small gap between pieces for easier fit and to provide a small amount of clamping force
 toleranceGap = 0.2;
 
 boltCenterOffset = 0.8;

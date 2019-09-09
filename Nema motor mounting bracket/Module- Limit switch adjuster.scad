@@ -11,15 +11,18 @@ lsaHeight = 6 - (baseCornerRoundness);
 lsaWidth = 15 - (baseCornerRoundness);
 lsaLength = 35 + 4.2 - (baseCornerRoundness);
 
-renderCornerBase();
-translate( [-1 * (thickness + lsaLength), -1 * (thickness + lsaHeight + (baseCornerRoundness/2)) - 0.1, (height/2) - (lsaWidth/2)] )
+translate( [-1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), -1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), 0] )
 {
-    renderPlatform();
+    renderCornerBase();
+    translate( [-1 * (thickness + lsaLength - 0.15), -1 * (thickness + lsaHeight + (baseCornerRoundness/2) - 0.15) - 0.1, (height/2) - (lsaWidth/2)] )
+    {
+        renderPlatform();
+    }
 }
 
 module renderCornerBase()
 {
-    translate( [-1 * (thickness + 4.2), internalNutTrapDistance, height/2] )
+    translate( [-1 * (thickness + 4.05), internalNutTrapDistance + 0.15, height/2] )
     {
         rotate( [0, 90, 0] )
         {
@@ -41,7 +44,7 @@ module renderPlatform()
             {
                 union()
                 {
-                    translate( [cutoutXY - (thickness/2) - 1, (thickness/2) + (baseCornerRoundness/2) - 0.4, -1 * (baseCornerRoundness/2)] )
+                    translate( [cutoutXY - (thickness/2) - 1 + cornerBaseExtensionLength, (thickness/2) + (baseCornerRoundness/2) - 0.4+ cornerBaseExtensionLength, -1 * (baseCornerRoundness/2)] )
                     {
                         cube( [cutoutXY, cutoutXY, lsaWidth + baseCornerRoundness] );
                     }
