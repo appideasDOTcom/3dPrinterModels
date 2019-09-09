@@ -9,7 +9,7 @@ include <Module- Generic baseplates.scad>
 
 lsaHeight = 6 - (baseCornerRoundness);
 lsaWidth = 15 - (baseCornerRoundness);
-lsaLength = 35 + 4.2 - (baseCornerRoundness);
+lsaLength = 24 + 4.2 - (baseCornerRoundness);
 
 translate( [-1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), -1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), 0] )
 {
@@ -70,12 +70,15 @@ module platform()
     hull()
     {
         {
-            translate( [2, 0, 0] )
+            translate( [2, 0, 2] )
             {
-                cube( [lsaLength - 2, lsaHeight, lsaWidth] );
+                cube( [lsaLength - 2, lsaHeight, lsaWidth - 4] );
             }
         }
         {
+            endcapShapeXDelta = 1;
+            endcapShapeYDelta = 2;
+
             union()
             {
                 
@@ -138,7 +141,7 @@ module platform()
 
                 // Endcap of platform
                 // Top
-                translate( [1, 0, 0] )
+                translate( [(1 + endcapShapeXDelta), 0, (0 + endcapShapeYDelta)] )
                 {
                     sphere( d=baseCornerRoundness );
                 }
@@ -164,7 +167,7 @@ module platform()
 
 
                 // Bottom
-                translate( [2, 0, lsaWidth] )
+                translate( [(2 + endcapShapeXDelta), 0, (lsaWidth - endcapShapeYDelta)] )
                 {
                     sphere( d=baseCornerRoundness );
                 }
