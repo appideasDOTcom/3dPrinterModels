@@ -70,17 +70,15 @@ module platform()
     hull()
     {
         {
-            cube( [lsaLength, lsaHeight, lsaWidth] );
+            translate( [2, 0, 0] )
+            {
+                cube( [lsaLength - 2, lsaHeight, lsaWidth] );
+            }
         }
         {
             union()
             {
-                sphere( d=baseCornerRoundness );
-
-                translate( [0, 0, lsaWidth] )
-                {
-                    sphere( d=baseCornerRoundness );
-                }
+                
                 translate( [lsaLength, 0, lsaWidth] )
                 {
                     translate( [-3.7, 0, 0] )
@@ -94,6 +92,7 @@ module platform()
                         }
                     }
                 }
+
                 translate( [lsaLength, lsaHeight, lsaWidth] )
                 {
                     translate( [-3.7, 0, 0] )
@@ -137,16 +136,46 @@ module platform()
                     }
                 }
 
-
-                translate( [0, lsaHeight, 0] )
+                // Endcap of platform
+                // Top
+                translate( [1, 0, 0] )
                 {
                     sphere( d=baseCornerRoundness );
                 }
 
-                translate( [0, lsaHeight, lsaWidth] )
+                translate( [1, 0, 0] )
+                {
+                    translate( [0, lsaHeight, 0] )
+                    {
+                        sphere( d=baseCornerRoundness );
+                    }
+                }
+
+                // Middle
+                translate( [-2, 0, lsaWidth/1.6] )
                 {
                     sphere( d=baseCornerRoundness );
                 }
+
+                translate( [-2, lsaHeight, lsaWidth/1.6] )
+                {
+                    sphere( d=baseCornerRoundness );
+                }
+
+
+                // Bottom
+                translate( [2, 0, lsaWidth] )
+                {
+                    sphere( d=baseCornerRoundness );
+                }
+
+                translate( [2, lsaHeight, lsaWidth] )
+                {
+                    sphere( d=baseCornerRoundness );
+                }
+
+
+
                 translate( [lsaLength, lsaHeight, lsaWidth] )
                 {
                     rotate( [90, 0, 0] )
@@ -154,6 +183,8 @@ module platform()
                         cube([(baseCornerRoundness/2), baseCornerRoundness/2, 2.8 ]);
                     }
                 }
+
+
                 translate( [lsaLength, lsaHeight, -1 * (baseCornerRoundness/2)] )
                 {
                     rotate( [90, 0, 0] )
