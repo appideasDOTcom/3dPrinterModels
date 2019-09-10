@@ -155,7 +155,7 @@ module platform()
                 }
 
                 // Middle
-                translate( [-2, 0, lsaWidth/1.6] )
+                translate( [(-2 + endcapShapeXDelta), 0, lsaWidth/1.6] )
                 {
                     sphere( d=baseCornerRoundness );
                 }
