@@ -1,11 +1,11 @@
 //!OpenSCAD
 /**
- * A top-mount wire trap module for the Universal Nema Mounting Bracket
+ * A top-mount wire trap module for a costmo Bracket
  *
  * costmo: 2019-09-04
  */
 
-include <Nema motor mounting bracket.scad>
+include <costmo Bracket.scad>
 include <Module- Generic baseplates.scad>
 
 // wtOnTopBaseWidth = ((cutoutXY - (toleranceGap * 2)) - (topBoltCutoutWidth * 2)) - 5;

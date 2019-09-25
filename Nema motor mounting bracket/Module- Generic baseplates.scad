@@ -1,10 +1,10 @@
 //!OpenSCAD
 /**
- * Generic baseplates to use as the foundation for Universal Nema Mounting Bracket modules
+ * Generic baseplates to use as the foundation for costmo Bracket attachments
  *
  * costmo: 2019-09-04
  */
-include <Nema motor mounting bracket.scad>
+include <costmo Bracket.scad>
 
 baseCornerRoundness = 1.2;
 

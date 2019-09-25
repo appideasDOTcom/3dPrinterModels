@@ -1,10 +1,10 @@
 //!OpenSCAD
 /**
- * A corner-mount module for the Universal Nema Mounting Bracket that provides an easy Z index adjustment mechanism
+ * A corner-mount module for a costmo Bracket that provides an easy Z index adjustment mechanism
  *
  * costmo: 2019-09-04
  */
-include <Nema motor mounting bracket.scad>
+include <costmo Bracket.scad>
 include <Module- Generic baseplates.scad>
 
 lsaHeight = 6 - (baseCornerRoundness);
