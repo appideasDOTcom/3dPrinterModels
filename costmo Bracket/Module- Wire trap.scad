@@ -104,9 +104,9 @@ module wiretrapBody()
                 }
             }
             {
-                translate( [wtBodyThickness/2, wtBodyThickness/1.3 - 0.4, 0] )
+                translate( [wtBodyThickness/2, wtBodyThickness/1.3 - 0.4, -0.1] )
                 {
-                    cube( [wtTopNeckWidth - wtBodyThickness, wtBodyHeight - wtBodyThickness, wtTopNeckDepth] );
+                    cube( [wtTopNeckWidth - wtBodyThickness, wtBodyHeight - wtBodyThickness, wtTopNeckDepth + 0.2] );
                 }
             }
             
