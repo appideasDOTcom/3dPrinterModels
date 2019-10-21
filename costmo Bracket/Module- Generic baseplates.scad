@@ -144,10 +144,13 @@ module cornerSide()
                 
             }
         }
-    }
-
-            
+    }       
 }
+
+// translate( [-11.6, -11.6, 3 - (baseCornerRoundness/2) - 0.1] )
+// {
+//     cylinder( r = baseCornerRoundness, h = lsaWidth + (baseCornerRoundness) );
+// }
 
 // examples:
 /**

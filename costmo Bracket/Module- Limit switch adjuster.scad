@@ -11,13 +11,47 @@ lsaHeight = 6 - (baseCornerRoundness);
 lsaWidth = 15 - (baseCornerRoundness);
 lsaLength = 24 + 4.2 - (baseCornerRoundness);
 
-translate( [-1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), -1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), 0] )
+renderSidePlatform = true;
+renderFrontPlatform = false;
+
+if( renderSidePlatform )
 {
-    renderCornerBase();
-    translate( [-1 * (thickness + lsaLength - 0.15), -1 * (thickness + lsaHeight + (baseCornerRoundness/2) - 0.15) - 0.1, (height/2) - (lsaWidth/2)] )
+    translate( [-1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), -1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), 0] )
     {
-        renderPlatform();
+        renderCornerBase();
+        translate( [-1 * (thickness + lsaLength - 0.15), -1 * (thickness + lsaHeight + (baseCornerRoundness/2) - 0.15) - 0.1, (height/2) - (lsaWidth/2)] )
+        {
+            renderPlatform();
+        }
     }
+}
+
+if( renderFrontPlatform )
+{
+    translate( [-1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), -1 * ((bpPlatformHeightBase/2) - (baseCornerRoundness)), 0] )
+    {
+        renderCornerBase();
+        rotate( [0, 90, 0] )
+        translate( [-1 * (thickness + lsaLength - 0.15) - 6, -1 * (thickness + lsaHeight + (baseCornerRoundness/2) - 0.15) - 0.1, (height/2) - (lsaWidth/2) + 0.4] )
+        {
+            difference()
+            {
+                {
+                    renderPlatform();
+                }
+                {
+                    translate( [-5, thickness, -3] )
+                    {
+                        cube( [45, 10, 20] );
+                    }
+                }
+            }
+            
+        }
+    }
+
+
+
 }
 
 module renderCornerBase()
