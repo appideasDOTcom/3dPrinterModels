@@ -11,8 +11,8 @@ $fa = 1;
  // Render Quality: Minimum size
 $fs = 0.1;
 
-// The X and Y dimensions od the motor. Added 0.2mm to the technically correct size for tolerance
-cutoutXY = 42.5;
+// The X and Y dimensions to the motor.
+cutoutXY = 42.3;
 // How tall to print - or how wide the piece will be. This piece fits between the metal endcaps of the motor housing. The most common motor has a 20mm gap between the raised metal pieces, so you'll probably need that value or less
 height = 19.6;
 // How thick the printed piece will be
@@ -43,7 +43,7 @@ internalNutTrapDistance = ((cutoutXY - distanceBetweenInternalNutTraps)/2);
 topNutTrapDistance = ((cutoutXY - distanceBetweenTopNutTraps)/2);
 
 // Set to true to orient the pieces to output for printing
-orientForPrinting = false;
+orientForPrinting = true;
 
 // Set this to false to not render this model - typically when including this as a base module
 renderModel = true;
@@ -370,6 +370,11 @@ module roundedBodyCorners()
 module m4Nut()
 {
     cylinder(h = 4.6, r = 4.45, $fn=6);
+}
+
+module pressFitM4Nut()
+{
+    cylinder(h = 4.6, r = 3.9, $fn=6);
 }
 
 module m4HeadCutout()

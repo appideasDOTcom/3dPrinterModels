@@ -3,9 +3,15 @@
 // This code originated in blockscad3D, and I haven't taken the time to refactor it to be easier to manipulate other than to
 //   add a few variables to the top to adjust the output more easily (without changing code)
 
+// render quality settings
+$fa = 1;
+$fs = 0.1;
+
 // Add length to the arm, making the limit switch further away from the center
-extraLength = 0;
-// extraLength = 5;
+// extraLength = 0;
+extraLength = 11;
+
+
 
 // Add some girth to the arm to make it less likely to break
 extraThickness = 0;
@@ -23,7 +29,7 @@ extraGulfWidth = 0;
 renderNutTrap = true;
 
 // Determine the side of the piece that contains the nut trap. Set to false for "left"
-nutTrapRight = false;
+nutTrapRight = true;
 
 // Turn bolt cutouts into a module so they can be reused
 module boltCutouts()
@@ -33,7 +39,6 @@ module boltCutouts()
         translate([(45.3 + extraLength), 0, 15.1]){
           rotate([90, 0, 0]){
             {
-              $fn=64;    //set sides to 64
               cylinder(r1=1.8, r2=1.8, h=10, center=false);
             }
           }
@@ -41,7 +46,6 @@ module boltCutouts()
         translate([(26.8 + extraLength), 0, 15.1]){
           rotate([90, 0, 0]){
             {
-              $fn=64;    //set sides to 64
               cylinder(r1=1.8, r2=1.8, h=10, center=false);
             }
           }
@@ -49,7 +53,6 @@ module boltCutouts()
         translate([-10, 10, 5]){
           rotate([90, 0, 0]){
             {
-              $fn=64;    //set sides to 64
               cylinder(r1=2.1, r2=2.1, h=20, center=false);
 
               if( renderNutTrap )
@@ -73,7 +76,7 @@ module nutTrap( wallOffset )
 {
   translate( [0, 0, (wallOffset - 1.5)] )
   {
-    cylinder(h = 4.5, r = 4.1, $fn=6);
+    cylinder(h = 4.5, r = 4.0, $fn=6);
   }
 }
 
@@ -108,7 +111,6 @@ module essCurve( d, h )
 
           linear_extrude( height=(zDimension + 2), twist=0, scale=[1, 1], center=false)
           {
-            $fn=64;    //set sides to 64
             circle(r=(xDimension / 2));
           }
           
@@ -131,7 +133,6 @@ union(){
       // Rod cutout
       union(){
         {
-          $fn=64;    //set sides to 64
           cylinder(r1=4, r2=4, h=17.6, center=false);
         }
         translate([-15.5, -3, 0]){
@@ -170,7 +171,6 @@ union(){
         translate([(46.8 + extraLength), -17, 0]){
           linear_extrude( height=1, twist=0, scale=[1, 1], center=false){
             {
-              $fn=64;    //set sides to 64
               circle(r=1);
             }
           }
@@ -178,7 +178,6 @@ union(){
         translate([9, -17, 0]){
           linear_extrude( height=1, twist=0, scale=[1, 1], center=false){
             {
-              $fn=64;    //set sides to 64
               circle(r=1);
             }
           }
@@ -203,7 +202,6 @@ union(){
         translate([(46.8 + extraLength), -8.6, 1]){
           linear_extrude( height=(2 + extraShelfHeight), twist=0, scale=[1, 1], center=false){
             {
-              $fn=64;    //set sides to 64
               circle(r=1);
             }
           }
@@ -211,7 +209,6 @@ union(){
         translate([9, -8.6, 1]){
           linear_extrude( height=(2 + extraShelfHeight), twist=0, scale=[1, 1], center=false){
             {
-              $fn=64;    //set sides to 64
               circle(r=1);
             }
           }
@@ -236,7 +233,6 @@ union(){
         translate([(46.8 + extraLength), -17, 1]){
           linear_extrude( height=(2 + extraShelfHeight), twist=0, scale=[1, 1], center=false){
             {
-              $fn=64;    //set sides to 64
               circle(r=1);
             }
           }
@@ -244,7 +240,6 @@ union(){
         translate([(46.8 + extraLength), (-12.8 - extraGulfWidth), 1]){
           linear_extrude( height=(2 + extraShelfHeight), twist=0, scale=[1, 1], center=false){
             {
-              $fn=64;    //set sides to 64
               circle(r=1);
             }
           }
@@ -252,7 +247,6 @@ union(){
         translate([9, (-12.8 - extraGulfWidth), 1]){
           linear_extrude( height=(2 + extraShelfHeight), twist=0, scale=[1, 1], center=false){
             {
-              $fn=64;    //set sides to 64
               circle(r=1);
             }
           }
@@ -260,7 +254,6 @@ union(){
         translate([9, -17, 1]){
           linear_extrude( height=(2 + extraShelfHeight), twist=0, scale=[1, 1], center=false){
             {
-              $fn=64;    //set sides to 64
               circle(r=1);
             }
           }
@@ -276,19 +269,16 @@ union(){
         union(){
           translate([-15.5, 4.5, 0]){
             {
-              $fn=64;    //set sides to 64
               cylinder(r1=1.5, r2=1.5, h=10, center=false);
             }
           }
           translate([-15.5, -4.5, 0]){
             {
-              $fn=64;    //set sides to 64
               cylinder(r1=1.5, r2=1.5, h=10, center=false);
             }
           }
           translate([(49 + extraLength), (-4 + (extraThickness/2)), 0]){
             {
-              $fn=64;    //set sides to 64
               cylinder(r1=(2 + (extraThickness/2)), r2=(2 + (extraThickness/2)), h=17.6, center=false);
             }
           }
@@ -332,7 +322,6 @@ union(){
   difference() {
     translate([0, 0, 0]){
       {
-        $fn=64;    //set sides to 64
         cylinder(r1=6.4, r2=6.4, h=10, center=false);
       }
     }
@@ -340,7 +329,6 @@ union(){
     union(){
       translate([0, 0, 0]){
         {
-          $fn=64;    //set sides to 64
           cylinder(r1=4, r2=4, h=10, center=false);
         }
       }
