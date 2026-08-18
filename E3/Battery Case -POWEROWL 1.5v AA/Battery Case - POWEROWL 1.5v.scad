@@ -2,8 +2,8 @@
  * Battery Case for the POWEROWL 1.5v AA smart charger — base.
  *
  * Bottom half of a two-piece case. The lid's collar wraps the outside of this
- * wall and snaps over the detent beads on it. All dimensions live in
- * "Battery Case - shared.scad".
+ * wall and its fingers hook under the snap ledges low on it. All dimensions
+ * live in "Battery Case - shared.scad".
  *
  * costmo: 2026-08-17
  */
@@ -14,13 +14,16 @@ module _floor() {
 	_plan_slab( base_width, base_depth, base_thinckness, corner_radius );
 }
 
-// The notch in the front long wall, centred on the wall's length. Overshoots
-// the wall in Y and runs past the top in Z, so the cut leaves no zero-thickness
-// skin and exits open at maximum Z.
+// The cable opening in the front long wall, centred on the wall's length.
+// Overshoots the wall in Y so the cut leaves no zero-thickness skin. When
+// cutout_bridged is set it closes at cutout_top, which the wall bridges over;
+// otherwise it runs out through the top of the wall as before.
 // Move it to the back wall by using base_depth - 1 for the Y translate.
 module _wall_cutout() {
+	top = cutout_bridged ? cutout_top : wall_height + 1;
+
 	translate( [(base_width - cutout_width) / 2, -(wall_thinckness + 1), cutout_bottom] )
-		cube( [cutout_width, wall_thinckness + 2, (wall_height - cutout_bottom) + 1] );
+		cube( [cutout_width, wall_thinckness + 2, top - cutout_bottom] );
 }
 
 // The wall wraps the outside of the floor, leaving the floor footprint untouched.
@@ -43,7 +46,7 @@ module _base() {
 	_floor();
 	_wall();
 	// Added last, so nothing can cut into the mating features
-	_detents();
+	_snap_ledges();
 }
 
 _base();

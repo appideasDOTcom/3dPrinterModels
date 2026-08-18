@@ -2,7 +2,7 @@
  * Battery Case for the POWEROWL 1.5v AA smart charger — lid.
  *
  * Top half of a two-piece case. The collar drops over the outside of the base
- * wall and its grooves capture the base's detent beads. The shoulder lands on
+ * wall and the fingers below it hook under the base's ledges. The shoulder lands on
  * the base wall's top edge, so the added headroom is set by geometry rather
  * than by how hard the lid is pressed on.
  *
@@ -40,7 +40,7 @@ module _lid_usb_relief() {
 	reach = collar_offset + 1;
 
 	translate( [(base_width - relief_width) / 2, -reach, collar_bottom_z - 1] )
-		cube( [relief_width, reach, (seam_z - collar_bottom_z) + 1] );
+		cube( [relief_width, reach, cutout_top - collar_bottom_z + 1] );
 }
 
 // Negative volume: the logo, centred on the lid. Overshoots the top face so the
@@ -90,13 +90,13 @@ module _lid() {
 		translate( [0, 0, seam_z] )
 			_plan_slab( base_width, base_depth, lid_clearance_height, corner_radius );
 
-		_detent_grooves();
 		_lid_usb_relief();
 		_logo_cut();
 	}
 
 	_lift_tabs();
 	_locators();
+	_snap_fingers();
 }
 
 _lid();
