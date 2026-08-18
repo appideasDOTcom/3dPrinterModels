@@ -33,7 +33,7 @@ cutout_bottom = 4.5;
 lid_clearance_height = 2.5;
 lid_top_thinckness = 1.2;
 // Gap between the base's outer wall face and the collar's inner face
-lid_clearance = 0.30;
+lid_clearance = 0.20;
 // How far the collar drops down the outside of the base wall
 collar_depth = 6.0;
 collar_thinckness = 1.6;
