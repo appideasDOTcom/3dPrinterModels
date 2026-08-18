@@ -17,17 +17,17 @@ variables to alter the output. Read the comments for details.
 **/
 
 // The number of tablespoons the cup is to measure
-numberOfTablespoons = 5;
+numberOfTablespoons = 8;
 // The label you want to appear on the handle (2-4 characters)
-handleLabel = "5T";
+handleLabel = "SM";
 
 // Default facet count settings (control model smoothness)
 //$fn = 30; // Number of facets -- very inneficient way to control rendering smoothness. Probably should leave this commented
 //
 // Minimum angle - use for final rendering
-$fa = 3;
+$fa = 1;
 // Minumum size - use for final rendering
-$fs = 0.2;
+$fs = 0.1;
 //
 // Minimum angle -  use for previewing
 // $fa = 5;
@@ -42,20 +42,20 @@ lipRadius = 10;
 bottomClearance = 2;
 
 // Label letter height. Too tall is brittle, too short can't bee seen
-letterHeight = 1.4; 
+letterHeight = 1.4;
 // Label font size. 6 is as large as will fit on the handle
-fontSize = 6;
+fontSize = 5;
 // Label font. You maybe want something like "courier" for Windows.
-font = "monaco"; 
+font = "monaco";
 
 // Scale the input radius for the given volume by this much to account for printing inaccuaracies (1.0 = 100%).
-multiplicationFactor = 1.05; 
+multiplicationFactor = 1.05;
 
 // Set the distance of the label from the cup. 2.5 will roughly center a two character label on the handle.
-textOffsetDivisor = 3.1; 
+textOffsetDivisor = 2.9;
 
 // Set the scale of the base (bottom) of the unit in relation to the desired measuring amount
-baseRadiusMultiplier = 0.7; 
+baseRadiusMultiplier = 0.7;
 
 // get to work!
 // To make different cups, replace the first input the number of tablespoons to make
@@ -134,8 +134,8 @@ module makeCup( tablespoons, label )
 			}
 		}
 	}
-	
-	
+
+
 } // makeCup
 
 module makeHandle( radius, label )

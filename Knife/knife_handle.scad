@@ -1,0 +1,1 @@
+linear_extrude( height = 1 ) import( "./Knife_Handle-02.svg" );

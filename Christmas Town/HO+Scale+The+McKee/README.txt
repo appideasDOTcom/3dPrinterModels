@@ -1,0 +1,1 @@
+HO Scale The McKee by kabrumble on Thingiverse: https://www.thingiverse.com/thing:4148305

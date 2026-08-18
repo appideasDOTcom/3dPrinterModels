@@ -1,5 +1,6 @@
 /**
- * A generic bracket for a Nema 17 motor with a modular build approach so that an aribtrary number and type of things can be mounted to it
+ * A generic bracket for a Nema 17 motor with a modular build approach so that an aribtrary number and type of 
+ *    things can be mounted to it
  *
  * costmo: 2019-09-04
  */
@@ -11,10 +12,15 @@ $fa = 1;
  // Render Quality: Minimum size
 $fs = 0.1;
 
-// The X and Y dimensions to the motor.
-cutoutXY = 42.3;
-// How tall to print - or how wide the piece will be. This piece fits between the metal endcaps of the motor housing. The most common motor has a 20mm gap between the raised metal pieces, so you'll probably need that value or less
-height = 19.6;
+// Use toleranceGap to provide horizontal clamp and topClampAmount to provide vertical clamp. Changing the bracket 
+//    dimensions to clamp the motor gives you pieces that have to be bent outward to install, which is bad. Set cutoutXY
+//    to your exact motor dimensions or very slightly larger
+// The X and Y dimensions to the motor. Typically 42.0 - 42.3
+cutoutXY = 42.15; // ostmoxy printerX motors are 42.15mm.
+// This piece fits between the metal endcaps of the motor housing. The most common motor has a 20mm gap between the 
+//     raised metal pieces, so you'll probably need that value or less for the print height below.
+// How tall to print - or how wide the installed piece will be. 
+height = 26.0; // ostmoxy printerX motors have a 26.2mm gap. Most motors should be < 20
 // How thick the printed piece will be
 thickness = 7;
 
@@ -25,11 +31,15 @@ topBoltCutoutWidth = 8;
 // How much material should go beneath the cutout shape for support and space for extra modular options
 topPieceSupport = 7;
 
+// Add a small gap between pieces for easier fit and to provide a small amount of horizontal clamping force
+toleranceGap = 0.5;
+// extra amount to add to the bottom of the top piece for vertical clamping
+topClampAmount = 0.4;
+
 // How thick/tall the top piece will be in total
 topThickness = (topBoltCutoutHeight + topPieceSupport);
-// Add a small gap between pieces for easier fit and to provide a small amount of clamping force
-toleranceGap = 0.2;
 
+// Amount to adjust the top bolt cutouts to keep them centered
 boltCenterOffset = 0.8;
 
 // Set the distance between the nut traps on main unit
@@ -38,15 +48,15 @@ distanceBetweenInternalNutTraps = 20;
 // Set the distance between the nut traps on the top piece. These need to be a little closer to make room for other stuff that may already be in the way.
 distanceBetweenTopNutTraps = 12;
 
-// Calculated for use in code below. Don't change this
+// Calculated for use in code below. Don't change these
 internalNutTrapDistance = ((cutoutXY - distanceBetweenInternalNutTraps)/2);
 topNutTrapDistance = ((cutoutXY - distanceBetweenTopNutTraps)/2);
 
-// Set to true to orient the pieces to output for printing
+// Set to true to orient the pieces to output for printing. False to place them together for fit.
 orientForPrinting = true;
 
 // Set this to false to not render this model - typically when including this as a base module
-renderModel = true;
+renderModel = false;
 
 /** Build the final piece(s) here **/
 
@@ -54,7 +64,7 @@ if( renderModel )
 {
     if( !orientForPrinting )
     {
-        %mountToView();
+        mountToView();
     }
     else
     {
@@ -162,12 +172,12 @@ module internalNutTraps()
         m3NutAndThroughHole( yRotationAngle = -90, xRotationAngle = 90 );
     }
 
-    translate( [topNutTrapDistance, (cutoutXY + 4.7), (height/2)] )
+    translate( [topNutTrapDistance, (cutoutXY + 4.7) - topClampAmount, (height/2)] )
     {
         m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 90 );
     }
 
-    translate( [(cutoutXY - topNutTrapDistance), (cutoutXY + 4.7), (height/2)] )
+    translate( [(cutoutXY - topNutTrapDistance), (cutoutXY + 4.7) - topClampAmount, (height/2)] )
     {
         m3NutAndThroughHole( yRotationAngle = 90, xRotationAngle = 90 );
     }
@@ -200,7 +210,7 @@ module topCorners()
             {
                 translate( [(4.9 - toleranceGap), -5.8, -1] )
                 {
-                    cube( [5.8, 11.6, (height + 2)] );
+                    cube( [6, 11.6, (height + 2)] );
                 }
             }
         }
@@ -220,9 +230,9 @@ module topCorners()
                 }
             }
             {
-                translate( [(-5.8 + toleranceGap), -5.8, -1] )
+                translate( [(-6 + toleranceGap), -5.8, -1] )
                 {
-                    cube( [5.8, 11.6, (height + 2)] );
+                    cube( [6, 11.6, (height + 2)] );
                 }
             }
         }
@@ -276,9 +286,9 @@ module top()
     {
         {
             // The main cube
-            translate( [toleranceGap, cutoutXY, 0] )
+            translate( [toleranceGap, cutoutXY - topClampAmount, 0] )
             {
-                cube( [(cutoutXY - (toleranceGap * 2)), topThickness, height] );
+                cube( [(cutoutXY - (toleranceGap * 2)), topThickness + topClampAmount, height] );
             }
         }
         {
@@ -296,8 +306,8 @@ module top()
                     }
                 }
 
-               translate( [-4.6, 3.5, (height/2 + boltCenterOffset)] )
-                {
+                translate( [-4.6, 3.5, (height/2 + boltCenterOffset)] )
+            	{
                     rotate( [0, 90, 0] )
                     {
                         m4Nut();
@@ -369,12 +379,17 @@ module roundedBodyCorners()
 
 module m4Nut()
 {
-    cylinder(h = 4.6, r = 4.45, $fn=6);
+    cylinder(h = 4.6, r = 4.05, $fn=6);
 }
 
 module pressFitM4Nut()
 {
     cylinder(h = 4.6, r = 3.9, $fn=6);
+}
+
+module coveredM4Nut( height = 3.4, diameter = 8.3 )
+{
+    cylinder( h = height, d = diameter, $fn=6 );
 }
 
 module m4HeadCutout()

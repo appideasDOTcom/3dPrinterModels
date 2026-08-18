@@ -1,0 +1,39 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=LED Support
+*Date=14:10:50
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;5 mm [THT];39.9244;-38.0623;0;Bottom;LED9
+2;;5 mm [THT];23.9244;-52.0623;0;Bottom;LED2
+3;;5 mm [THT];39.9244;-8.06234;0;Bottom;LED24
+4;;5 mm [THT];55.9244;-8.06234;0;Bottom;LED23
+5;;5 mm [THT];23.9244;-8.06234;0;Bottom;LED22
+6;;5 mm [THT];73.9244;-52.0623;0;Bottom;LED5
+7;;5 mm [THT];23.9244;-38.0623;0;Bottom;LED8
+8;;5 mm [THT];73.9246;-8.06234;0;Bottom;LED20
+9;;5 mm [THT];39.9244;-52.0623;0;Bottom;LED3
+10;;5 mm [THT];55.9244;-38.0623;0;Bottom;LED10
+11;;5 mm [THT];91.9244;-8.06234;0;Bottom;LED19
+12;;5 mm [THT];23.9244;-23.0623;0;Bottom;LED16
+13;;5 mm [THT];91.9245;-23.0623;0;Bottom;LED13
+14;;5 mm [THT];7.92444;-52.0623;0;Bottom;LED1
+15;;5 mm [THT];7.92442;-23.0623;0;Bottom;LED15
+16;;5 mm [THT];7.92444;-38.0623;0;Bottom;LED7
+17;;5 mm [THT];91.9244;-38.0623;0;Bottom;LED12
+18;;5 mm [THT];73.9246;-23.0623;0;Bottom;LED14
+19;;5 mm [THT];55.9244;-52.0623;0;Bottom;LED4
+20;;5 mm [THT];73.9244;-38.0623;0;Bottom;LED11
+21;;5 mm [THT];7.92437;-8.06234;0;Bottom;LED21
+22;;5 mm [THT];55.9245;-23.0623;0;Bottom;LED17
+23;;5 mm [THT];90.9244;-52.0623;0;Bottom;LED6
+24;;5 mm [THT];39.9245;-23.0623;0;Bottom;LED18

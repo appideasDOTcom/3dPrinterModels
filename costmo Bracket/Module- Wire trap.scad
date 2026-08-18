@@ -189,10 +189,11 @@ module renderTopBase()
     difference()
     {
         {
-            fullTopBase();
+            fullTopBase( fillInHoles = true );
         }
         {
-            fullTopBoltCutouts();
+            // fullTopBoltCutouts();
+            m4TopBoltCutouts();
         }
     }
 }
@@ -214,7 +215,7 @@ module fullSideBase()
     }
 }
 
-module fullTopBase()
+module fullTopBase( fillInHoles = false )
 {
     translate( [(cutoutXY/2) - (wtOnTopBaseWidth/2), (cutoutXY + topPieceSupport), 0] )
     {
@@ -237,6 +238,10 @@ module fullTopBase()
             translate( [(wtBasePlateExtraWidth - 7 + 1), 0, 11.8] )
             {
                 cube( [distanceBetweenTopNutTraps, 7.6, (wtBasePlateExtraWidth - 7)] );
+                if( fillInHoles )
+                {
+                    translate( [-2.5, 0, -6] ) cube( [distanceBetweenTopNutTraps + 5, 7.6, (wtBasePlateExtraWidth - 7) + 5] );
+                }
             }
 
             hull()
@@ -298,6 +303,19 @@ module fullTopBoltCutouts()
             {
                 connectedM3HeadCutouts( distanceBetweenTopNutTraps, 0 );
             }
+        }
+    }
+}
+
+module m4TopBoltCutouts()
+{
+    translate( [(cutoutXY/2), (cutoutXY + topPieceSupport) - 2.3, 0.5] )
+    translate( [0, 10, (height/2)] )
+    {
+        rotate( [90, 0, 0] )
+        {
+            m4ThroughHole();
+            m4HeadCutout();
         }
     }
 }

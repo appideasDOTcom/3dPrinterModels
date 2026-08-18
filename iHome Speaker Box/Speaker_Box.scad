@@ -17,27 +17,27 @@ baseHeight = 35;
 markerSize = 5;
 
 base();
-//lid();
+// lid();
 
 // mark the long edges so the lid and base can be more easily matched visually + you know where to put the cord
 module markers()
 {
-    
+
     translate( [(baseWidth / 4), ((-1 * wallThickness) - (markerSize - 0.4)), (baseHeight / 5)] )
     {
         markerCube();
     }
-    
+
     translate( [(baseWidth / 4) * 2.6, ((-1 * wallThickness) - (markerSize - 0.4)), (baseHeight / 5)] )
     {
         markerCube();
     }
-    
+
     translate( [(baseWidth / 4), (baseLength + wallThickness - 0.4), (baseHeight / 5)] )
     {
         markerCube();
     }
-    
+
     translate( [(baseWidth / 4) * 2.6, (baseLength + wallThickness - 0.4), (baseHeight / 5)] )
     {
         markerCube();
@@ -80,7 +80,7 @@ module lid()
     lidHeight = 26;
     //lidHeight = 10;
     scaleFactor = 1.048;
-    
+
     difference()
     {
         {
