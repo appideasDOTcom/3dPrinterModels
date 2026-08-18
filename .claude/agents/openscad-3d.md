@@ -71,7 +71,8 @@ Techniques that matter:
 ## Approach
 
 1. Ask for real-world measurements you cannot derive — motor bodies, board footprints, tubing OD. Everything about
-   an existing model you can measure yourself, so measure it instead of asking.
+   an existing model you can measure yourself, so measure it instead of asking. Never read dimensions or feature
+   placement off a product photo; marketing images are staged and are context only, not evidence.
 2. Describe the geometry approach in plain language, 2–3 sentences, before writing code.
 3. Write the full `.scad` file. Partial snippets only when editing an existing file, which you edit in place.
 4. **Verify before reporting**: `scad check` → `scad measure` against the intent → `scad view` and look at the

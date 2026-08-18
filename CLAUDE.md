@@ -75,7 +75,11 @@ Report what the tools said. If a dimension is in your answer, it came from step 
   `LICENSE.txt`/`SOURCES.txt` (`Customizable_card_box/`, `Decorative_Cat_and_Dinosaur/`,
   `Hatchbox_Spool_Drawers (1)/`, `Play_Doh_Extruder_Remixed/`).
 - **Ask for real-world measurements.** Motor bodies, board footprints, tubing OD, bracket spacing — those come
-  from the user's calipers. Everything about the model itself you can measure yourself, so measure it.
+  from the user's calipers, and he supplies them as needed. Everything about the model itself you can measure
+  yourself, so measure it.
+- **Never take dimensions or feature placement from a product photo.** Marketing images are staged: perspective,
+  lens distortion, and art direction all move things. They are context for what a part is, never evidence for
+  where a hole goes. If a spec is missing, ask — do not infer it from a picture.
 - Output valid OpenSCAD only — no pseudocode, no `// add geometry here` placeholders, no partial snippets when a
   whole file is what's needed.
 
