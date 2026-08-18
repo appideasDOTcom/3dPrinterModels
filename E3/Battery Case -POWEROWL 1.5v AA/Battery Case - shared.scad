@@ -33,7 +33,7 @@ cutout_bottom = 4.5;
 lid_clearance_height = 2.5;
 lid_top_thinckness = 1.2;
 // Gap between the base's outer wall face and the collar's inner face
-lid_clearance = 0.20;
+lid_clearance = 0.30;
 // How far the collar drops down the outside of the base wall
 collar_depth = 6.0;
 collar_thinckness = 1.6;
@@ -53,6 +53,18 @@ detent_release_angle = 45.0;
 detent_insert_angle = 30.0;
 // Bead centres along X, kept clear of the USB notch
 detent_positions_x = [30.0, 97.0];
+
+/* --- Lateral locators on the short walls --- */
+// The detent grooves are slots running along X, so they pin the lid in Y but
+// do nothing in X — that is where the play shows up. These ribs take the X
+// play out locally, instead of tightening 420 mm of perimeter to chase it.
+// They live entirely on the lid, so the base is unaffected.
+locator_engage = 0.10;
+locator_width  = 3.0;
+// A small flat at the tip rather than a knife edge, so it wears in and stops
+locator_flat   = 0.8;
+locator_lead_in = 2.0;
+locator_positions_y = [20.0, 63.0];
 
 /* --- Lift tabs on the short ends --- */
 lift_tab_width = 10.0;
@@ -78,6 +90,9 @@ detent_proud = lid_clearance + detent_engage;
 // stand proud of its shoulder.
 detent_groove_depth = detent_engage + 0.10;
 detent_lower_run = detent_proud / tan( detent_release_angle );
+// Rib protrusion from the collar's inner face; only locator_engage of it is
+// interference, exactly as with the detent beads
+locator_proud = lid_clearance + locator_engage;
 detent_upper_run = detent_proud / tan( detent_insert_angle );
 
 // The seam: the top edge of the base wall, where the lid's shoulder lands
@@ -159,6 +174,37 @@ module _lift_tab( width = lift_tab_width ) {
 					[lift_tab_proud, 0],
 					[-0.5, run]
 				] );
+}
+
+// One lateral locator: a vertical ridge on the collar's inner face, protruding
+// +X. Its lower end tapers back flush over locator_lead_in, so a lid coming
+// down off centre is walked into place rather than jamming on the rib. Printed
+// inverted, that taper faces up and the ridge itself is a vertical wall
+// feature, so none of it needs support.
+module _locator_rib() {
+	profile = [
+		[-0.5, -locator_width / 2],
+		[locator_proud, -locator_flat / 2],
+		[locator_proud, locator_flat / 2],
+		[-0.5, locator_width / 2]
+	];
+
+	hull() {
+		translate( [0, 0, collar_bottom_z] )
+			linear_extrude( height = 0.01 ) scale( [0.01, 1] ) polygon( profile );
+		translate( [0, 0, collar_bottom_z + locator_lead_in] )
+			linear_extrude( height = (seam_z - collar_bottom_z) - locator_lead_in )
+				polygon( profile );
+	}
+}
+
+module _locators() {
+	for( y = locator_positions_y ) {
+		translate( [-(wall_thinckness + lid_clearance), y, 0] )
+			_locator_rib();
+		translate( [base_width + wall_thinckness + lid_clearance, y, 0] )
+			rotate( [0, 0, 180] ) _locator_rib();
+	}
 }
 
 module _lift_tabs() {
