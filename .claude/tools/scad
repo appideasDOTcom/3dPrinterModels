@@ -1,0 +1,594 @@
+#!/usr/bin/env python3
+"""
+scad — OpenSCAD measurement and rendering harness.
+
+Answer questions about a model by asking OpenSCAD, not by tracing variables by hand.
+
+  scad eval    FILE EXPR...          exact value of any expression, with all includes resolved
+  scad check   FILE                  compile; report errors and warnings
+  scad measure FILE [--module M()]   exact bounding box, size, volume, mass, bed fit
+  scad slice   FILE --at z=10        extents of the cross-section at a plane
+  scad view    FILE [--views ...]    orthographic PNG renders, optionally cut away
+  scad export  FILE -o OUT.stl       mesh export
+
+Every subcommand takes --module 'expr()' to target one module instead of the whole
+file, and -D var=val (repeatable) to override variables.
+"""
+
+import argparse
+import json
+import os
+import re
+import shutil
+import struct
+import subprocess
+import sys
+import tempfile
+
+BIN_CANDIDATES = [
+    os.environ.get("OPENSCAD_BIN"),
+    "/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD",
+    shutil.which("openscad"),
+    shutil.which("openscad-nightly"),
+]
+
+# Camera rotations (rot_x, rot_y, rot_z) matching OpenSCAD's named GUI views.
+VIEWS = {
+    "top":    (0, 0, 0),
+    "bottom": (180, 0, 0),
+    "front":  (90, 0, 0),
+    "back":   (90, 0, 180),
+    "left":   (90, 0, 90),
+    "right":  (90, 0, 270),
+    "iso":    (55, 0, 25),
+}
+
+BED = (220.0, 220.0, 250.0)   # Ender 3 Pro; override with --bed W,D,H
+DENSITY = 1.24                # PLA g/cm^3; override with --density
+BIG = 10000.0                 # half-space cube edge for cuts
+
+
+def die(msg, code=2):
+    print("scad: " + msg, file=sys.stderr)
+    sys.exit(code)
+
+
+def openscad_bin():
+    for c in BIN_CANDIDATES:
+        if c and os.path.exists(c):
+            return c
+    die("OpenSCAD binary not found. Set OPENSCAD_BIN.")
+
+
+def run(args, timeout=600):
+    return subprocess.run(
+        [openscad_bin()] + args,
+        capture_output=True, text=True, timeout=timeout,
+    )
+
+
+def scad_path(p):
+    """Absolute path formatted for use inside include<>/use<>/import()."""
+    return os.path.abspath(p).replace("\\", "/")
+
+
+class Temp:
+    """Scratch directory that survives for the life of the command."""
+
+    def __init__(self):
+        self.dir = tempfile.mkdtemp(prefix="scad-tool-")
+
+    def path(self, name):
+        return os.path.join(self.dir, name)
+
+    def write(self, name, text):
+        p = self.path(name)
+        with open(p, "w") as fh:
+            fh.write(text)
+        return p
+
+
+def defines(args):
+    out = []
+    for d in args.define or []:
+        out += ["-D", d]
+    return out
+
+
+# --------------------------------------------------------------------------
+# target resolution
+# --------------------------------------------------------------------------
+
+def echo_values(tmp, args, exprs, name="q"):
+    """Evaluate expressions in the file's own scope. No geometry is rendered."""
+    lines = ["include <%s>" % scad_path(args.file)]
+    for i, e in enumerate(exprs):
+        lines.append('echo("__Q__", %d, %s);' % (i, e))
+    src = tmp.write(name + ".scad", "\n".join(lines) + "\n")
+    out = tmp.path(name + ".echo")
+    r = run(["-o", out, src] + defines(args))
+    vals = {}
+    if os.path.exists(out):
+        for line in open(out):
+            m = re.match(r'ECHO: "__Q__", (\d+), (.*)$', line.strip())
+            if m:
+                vals[int(m.group(1))] = m.group(2)
+    return [vals.get(i) for i in range(len(exprs))], r.stderr
+
+
+def resolution_prelude(tmp, args):
+    """
+    `use <>` imports modules but NOT the special variables $fa/$fs/$fn, so a
+    wrapper that omits them renders the module at OpenSCAD's coarse defaults
+    ($fa=12, $fs=2) — an M3 hole comes out a hexagon and every curved dimension
+    is wrong. Read the target file's own values and restate them.
+    """
+    vals, _ = echo_values(tmp, args, ["$fa", "$fs", "$fn"], name="res")
+    out = []
+    for var, val in zip(("$fa", "$fs", "$fn"), vals):
+        try:
+            out.append("%s = %g;" % (var, float(val)))
+        except (TypeError, ValueError):
+            pass
+    if not out:
+        out = ["$fa = 1;", "$fs = 0.1;"]   # repo standard, if the file is silent
+    return "\n".join(out) + "\n"
+
+
+def target_scad(tmp, args):
+    """
+    Return a path to a .scad file whose top-level geometry is what the user
+    asked to operate on.
+
+    No --module: the file itself.
+    --module EXPR: a wrapper that `use`s the file and calls EXPR. `use` imports
+      modules without instantiating the file's own top-level geometry, and the
+      imported modules still see their defining file's variables — but not its
+      $fa/$fs/$fn, which resolution_prelude() restores.
+    """
+    if not os.path.exists(args.file):
+        die("no such file: " + args.file)
+    if not args.module:
+        return args.file
+    expr = args.module.strip().rstrip(";")
+    keyword = "include" if args.include else "use"
+    prelude = "" if args.include else resolution_prelude(tmp, args)
+    return tmp.write(
+        "target.scad",
+        "%s%s <%s>\n%s;\n" % (prelude, keyword, scad_path(args.file), expr),
+    )
+
+
+def export_stl(tmp, args, name="target.stl", src=None):
+    """Render the target to a binary STL and return (path, summary_dict)."""
+    src = src or target_scad(tmp, args)
+    out = tmp.path(name)
+    r = run(["--backend", "Manifold", "--export-format", "binstl",
+             "-o", out, "--summary", "all", "--summary-file", "-",
+             src] + defines(args))
+    summary = {}
+    if r.stdout.strip():
+        try:
+            summary = json.loads(r.stdout)
+        except json.JSONDecodeError:
+            pass
+    if not os.path.exists(out):
+        die("render failed:\n" + (r.stderr.strip() or "no output"), 1)
+    return out, summary, r.stderr
+
+
+def geom_scad(tmp, args, wrap):
+    """
+    Build a wrapper around the target's *mesh*, so booleans work regardless of
+    whether the geometry comes from top-level statements or a module.
+    `wrap` receives the import() call and returns OpenSCAD source.
+    """
+    stl, _, _ = export_stl(tmp, args)
+    body = wrap('import("%s", convexity=10);' % scad_path(stl))
+    return tmp.write("wrapped.scad", "$fa = 1;\n$fs = 0.1;\n" + body)
+
+
+# --------------------------------------------------------------------------
+# STL analysis
+# --------------------------------------------------------------------------
+
+def stl_stats(path):
+    """Volume (mm^3), surface area (mm^2) and bbox from a binary STL."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    if len(data) < 84:
+        return None
+    count = struct.unpack("<I", data[80:84])[0]
+    if len(data) < 84 + count * 50:
+        return None   # ASCII STL or truncated; caller falls back to summary
+    vol = 0.0
+    area = 0.0
+    lo = [float("inf")] * 3
+    hi = [float("-inf")] * 3
+    off = 84
+    unpack = struct.Struct("<12fH").unpack_from
+    for _ in range(count):
+        v = unpack(data, off)
+        off += 50
+        ax, ay, az = v[3], v[4], v[5]
+        bx, by, bz = v[6], v[7], v[8]
+        cx, cy, cz = v[9], v[10], v[11]
+        vol += (ax * (by * cz - bz * cy)
+                - ay * (bx * cz - bz * cx)
+                + az * (bx * cy - by * cx)) / 6.0
+        ux, uy, uz = bx - ax, by - ay, bz - az
+        wx, wy, wz = cx - ax, cy - ay, cz - az
+        nx, ny, nz = uy * wz - uz * wy, uz * wx - ux * wz, ux * wy - uy * wx
+        area += 0.5 * (nx * nx + ny * ny + nz * nz) ** 0.5
+        for i, val in ((0, ax), (1, ay), (2, az), (0, bx), (1, by), (2, bz),
+                       (0, cx), (1, cy), (2, cz)):
+            if val < lo[i]:
+                lo[i] = val
+            if val > hi[i]:
+                hi[i] = val
+    return {
+        "volume_mm3": abs(vol),
+        "area_mm2": area,
+        "facets": count,
+        "min": lo,
+        "max": hi,
+        "size": [hi[i] - lo[i] for i in range(3)],
+    }
+
+
+def bbox_of(summary):
+    bb = (summary.get("geometry") or {}).get("bounding_box")
+    if not bb:
+        return None
+    if any(abs(v) > 1e30 for v in bb.get("size", [])):
+        return None
+    return bb
+
+
+def fmt3(v, unit="mm"):
+    return "[%s] %s" % (", ".join("%.3f" % x for x in v), unit)
+
+
+# --------------------------------------------------------------------------
+# subcommands
+# --------------------------------------------------------------------------
+
+def cmd_eval(args):
+    tmp = Temp()
+    exprs = args.expr
+    lines = ["include <%s>" % scad_path(args.file)]
+    for i, e in enumerate(exprs):
+        lines.append('echo("__SCAD_EVAL__", %d, %s);' % (i, e))
+    src = tmp.write("eval.scad", "\n".join(lines) + "\n")
+    out = tmp.path("eval.echo")
+    r = run(["-o", out, src] + defines(args))
+    text = open(out).read() if os.path.exists(out) else ""
+    results = {}
+    for line in text.splitlines():
+        m = re.match(r'ECHO: "__SCAD_EVAL__", (\d+), (.*)$', line.strip())
+        if m:
+            results[int(m.group(1))] = m.group(2)
+    warn = [l for l in r.stderr.splitlines()
+            if "WARNING" in l or "ERROR" in l]
+    if args.json:
+        print(json.dumps({"values": {exprs[i]: results.get(i) for i in range(len(exprs))},
+                          "warnings": warn}, indent=2))
+        return
+    for i, e in enumerate(exprs):
+        val = results.get(i)
+        print("%s = %s" % (e, val if val is not None else "<undefined>"))
+    for w in warn[:20]:
+        print("  " + w.strip(), file=sys.stderr)
+
+
+def cmd_check(args):
+    tmp = Temp()
+    src = target_scad(tmp, args)
+    out = tmp.path("check.stl")
+    r = run(["--backend", "Manifold", "--export-format", "binstl",
+             "-o", out, "--summary", "geometry", "--summary-file", "-",
+             src] + defines(args))
+    problems = [l.strip() for l in r.stderr.splitlines()
+                if "WARNING" in l or "ERROR" in l or "TRACE" in l]
+    geom = {}
+    if r.stdout.strip():
+        try:
+            geom = json.loads(r.stdout).get("geometry", {})
+        except json.JSONDecodeError:
+            pass
+    errors = [p for p in problems if "ERROR" in p]
+    if args.json:
+        print(json.dumps({"ok": not errors and r.returncode == 0,
+                          "problems": problems, "geometry": geom}, indent=2))
+    else:
+        if problems:
+            print("%d problem(s):" % len(problems))
+            for p in problems:
+                print("  " + p)
+        else:
+            print("clean — no warnings or errors")
+        if geom:
+            print("geometry: %s facets, %s vertices, manifold=%s"
+                  % (geom.get("facets"), geom.get("vertices"),
+                     geom.get("simple")))
+    sys.exit(1 if errors or r.returncode != 0 else 0)
+
+
+def cmd_measure(args):
+    tmp = Temp()
+    stl, summary, stderr = export_stl(tmp, args)
+    bb = bbox_of(summary)
+    stats = stl_stats(stl) if not args.no_volume else None
+    if bb is None and stats:
+        bb = {"min": stats["min"], "max": stats["max"], "size": stats["size"]}
+    if bb is None:
+        die("no geometry produced (empty model, or --module names nothing)", 1)
+
+    size = bb["size"]
+    bed = [float(x) for x in args.bed.split(",")] if args.bed else list(BED)
+    footprint = sorted(size[:2])
+    bed_xy = sorted(bed[:2])
+    fits = (footprint[0] <= bed_xy[0] and footprint[1] <= bed_xy[1]
+            and size[2] <= bed[2])
+
+    data = {
+        "file": args.file,
+        "module": args.module,
+        "min": bb["min"], "max": bb["max"], "size": size,
+        "facets": (summary.get("geometry") or {}).get("facets"),
+        "vertices": (summary.get("geometry") or {}).get("vertices"),
+        "manifold": (summary.get("geometry") or {}).get("simple"),
+        "bed": bed, "fits_bed": fits,
+    }
+    if stats:
+        data["volume_mm3"] = stats["volume_mm3"]
+        data["area_mm2"] = stats["area_mm2"]
+        data["mass_g"] = stats["volume_mm3"] / 1000.0 * args.density
+
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return
+
+    label = args.file + (" :: " + args.module if args.module else "")
+    print(label)
+    print("  size   X %.3f  Y %.3f  Z %.3f mm" % tuple(size))
+    print("  min    " + fmt3(bb["min"]))
+    print("  max    " + fmt3(bb["max"]))
+    if stats:
+        print("  volume %.1f mm^3  (%.2f cm^3, ~%.1f g at %.2f g/cm^3)"
+              % (stats["volume_mm3"], stats["volume_mm3"] / 1000.0,
+                 data["mass_g"], args.density))
+        print("  area   %.1f mm^2" % stats["area_mm2"])
+    print("  mesh   %s facets, manifold=%s"
+          % (data["facets"], data["manifold"]))
+    print("  bed    %s on %.0f x %.0f x %.0f"
+          % ("FITS" if fits else "DOES NOT FIT", bed[0], bed[1], bed[2]))
+    for l in stderr.splitlines():
+        if "WARNING" in l or "ERROR" in l:
+            print("  " + l.strip(), file=sys.stderr)
+
+
+def parse_at(at):
+    m = re.match(r"^\s*([xyz])\s*=\s*(-?[\d.]+)\s*$", at, re.I)
+    if not m:
+        die("--at must look like z=10.5")
+    return m.group(1).lower(), float(m.group(2))
+
+
+def cmd_slice(args):
+    tmp = Temp()
+    axis, pos = parse_at(args.at)
+    t = args.thickness
+    idx = "xyz".index(axis)
+    lo = [-BIG / 2] * 3
+    lo[idx] = pos - t / 2.0
+    size = [BIG] * 3
+    size[idx] = t
+
+    src = geom_scad(
+        tmp, args,
+        lambda imp: ("intersection() {\n  %s\n  translate([%.6f, %.6f, %.6f]) "
+                     "cube([%.6f, %.6f, %.6f]);\n}\n"
+                     % (imp, lo[0], lo[1], lo[2], size[0], size[1], size[2])),
+    )
+    out = tmp.path("slice.stl")
+    r = run(["--backend", "Manifold", "--export-format", "binstl", "-o", out,
+             "--summary", "all", "--summary-file", "-", src])
+    summary = json.loads(r.stdout) if r.stdout.strip() else {}
+    bb = bbox_of(summary)
+    stats = stl_stats(out) if os.path.exists(out) else None
+    if bb is None and stats and stats["facets"]:
+        bb = {"min": stats["min"], "max": stats["max"], "size": stats["size"]}
+    if bb is None or not (stats and stats["facets"]):
+        msg = "no geometry at %s=%g" % (axis, pos)
+        print(json.dumps({"empty": True, "at": args.at}) if args.json else msg)
+        return
+
+    inplane = [i for i in range(3) if i != idx]
+    data = {
+        "at": args.at, "thickness": t,
+        "min": bb["min"], "max": bb["max"], "size": bb["size"],
+        "in_plane_axes": [ "xyz"[i] for i in inplane ],
+        "in_plane_size": [bb["size"][i] for i in inplane],
+        "cross_section_area_mm2": (stats["volume_mm3"] / t) if stats else None,
+    }
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return
+    print("cross-section at %s = %g (slab %.3f mm)" % (axis, pos, t))
+    print("  extents  %s %.3f x %s %.3f mm"
+          % (data["in_plane_axes"][0], data["in_plane_size"][0],
+             data["in_plane_axes"][1], data["in_plane_size"][1]))
+    print("  min      " + fmt3(bb["min"]))
+    print("  max      " + fmt3(bb["max"]))
+    if data["cross_section_area_mm2"] is not None:
+        print("  material %.2f mm^2 of solid in this plane"
+              % data["cross_section_area_mm2"])
+
+
+def cmd_view(args):
+    tmp = Temp()
+    views = [v.strip().lower() for v in args.views.split(",") if v.strip()]
+    for v in views:
+        if v not in VIEWS:
+            die("unknown view %r; choose from %s" % (v, ", ".join(VIEWS)))
+
+    if args.cut:
+        axis, pos = parse_at(args.cut)
+        idx = "xyz".index(axis)
+        lo = [-BIG / 2] * 3
+        lo[idx] = pos
+        if args.cut_keep == "high":
+            lo[idx] = pos - BIG
+        src = geom_scad(
+            tmp, args,
+            lambda imp: ("difference() {\n  %s\n  translate([%.6f, %.6f, %.6f])"
+                         " cube([%.6f, %.6f, %.6f]);\n}\n"
+                         % (imp, lo[0], lo[1], lo[2], BIG, BIG, BIG)),
+        )
+        extra = []
+    else:
+        src = target_scad(tmp, args)
+        extra = defines(args)
+
+    outdir = args.out or os.path.join(tempfile.gettempdir(), "scad-renders")
+    os.makedirs(outdir, exist_ok=True)
+    base = re.sub(r"[^A-Za-z0-9._-]+", "_",
+                  os.path.splitext(os.path.basename(args.file))[0])
+    if args.module:
+        base += "_" + re.sub(r"[^A-Za-z0-9]+", "", args.module)[:24]
+    w, h = (args.size.split("x") + ["900"])[:2]
+
+    written = []
+    for v in views:
+        rx, ry, rz = VIEWS[v]
+        png = os.path.join(outdir, "%s_%s.png" % (base, v))
+        cmd = ["--backend", "Manifold",
+               "--camera", "0,0,0,%g,%g,%g,140" % (rx, ry, rz),
+               "--viewall", "--autocenter",
+               "--projection", "p" if args.perspective else "o",
+               "--imgsize", "%s,%s" % (w, h),
+               "--colorscheme", args.colorscheme,
+               "-o", png]
+        if not args.clean:
+            # edges matter: on a flat-on view, a feature whose top face is
+            # coplanar-facing with the body behind it shades identically and
+            # disappears without them. scales give a readable ruler.
+            cmd += ["--view", "axes,scales,edges"]
+        if args.render:
+            cmd += ["--render", ""]
+        r = run(cmd + [src] + extra)
+        if os.path.exists(png):
+            written.append(png)
+        else:
+            print("scad: %s view failed: %s" % (v, r.stderr.strip()[:400]),
+                  file=sys.stderr)
+
+    if args.json:
+        print(json.dumps({"images": written}, indent=2))
+    else:
+        for p in written:
+            print(p)
+
+
+def cmd_export(args):
+    tmp = Temp()
+    src = target_scad(tmp, args)
+    fmt = os.path.splitext(args.output)[1].lstrip(".").lower()
+    cmd = ["--backend", "Manifold", "-o", args.output,
+           "--summary", "geometry", "--summary-file", "-"]
+    if fmt == "stl":
+        cmd += ["--export-format", "binstl" if args.binary else "asciistl"]
+    r = run(cmd + [src] + defines(args))
+    if not os.path.exists(args.output):
+        die("export failed:\n" + r.stderr.strip(), 1)
+    print("wrote " + args.output)
+    if r.stdout.strip():
+        try:
+            g = json.loads(r.stdout).get("geometry", {})
+            print("  %s facets, manifold=%s" % (g.get("facets"), g.get("simple")))
+        except json.JSONDecodeError:
+            pass
+
+
+# --------------------------------------------------------------------------
+
+def main():
+    p = argparse.ArgumentParser(
+        prog="scad", description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    def common(sp, module=True):
+        sp.add_argument("file")
+        sp.add_argument("-D", "--define", action="append", metavar="var=val",
+                        help="override a variable (repeatable)")
+        if module:
+            sp.add_argument("-m", "--module", metavar="EXPR",
+                            help="target one module call, e.g. 'wireTrap()'")
+            sp.add_argument("--include", action="store_true",
+                            help="use include<> instead of use<> for the wrapper "
+                                 "(needed when EXPR references file variables; "
+                                 "also renders the file's own output)")
+        sp.add_argument("--json", action="store_true")
+
+    sp = sub.add_parser("eval", help="evaluate expressions in the file's scope")
+    sp.add_argument("file")
+    sp.add_argument("expr", nargs="+")
+    sp.add_argument("-D", "--define", action="append", metavar="var=val")
+    sp.add_argument("--json", action="store_true")
+    sp.set_defaults(func=cmd_eval)
+
+    sp = sub.add_parser("check", help="compile and report warnings/errors")
+    common(sp)
+    sp.set_defaults(func=cmd_check)
+
+    sp = sub.add_parser("measure", help="bounding box, volume, mass, bed fit")
+    common(sp)
+    sp.add_argument("--bed", metavar="X,Y,Z", help="bed size (default 220,220,250)")
+    sp.add_argument("--density", type=float, default=DENSITY,
+                    help="g/cm^3 for the mass estimate (default 1.24, PLA)")
+    sp.add_argument("--no-volume", action="store_true",
+                    help="skip mesh analysis (faster on huge models)")
+    sp.set_defaults(func=cmd_measure)
+
+    sp = sub.add_parser("slice", help="extents of a cross-section at a plane")
+    common(sp)
+    sp.add_argument("--at", required=True, metavar="AXIS=POS",
+                    help="plane to cut, e.g. z=10")
+    sp.add_argument("--thickness", type=float, default=0.1,
+                    help="slab thickness in mm (default 0.1)")
+    sp.set_defaults(func=cmd_slice)
+
+    sp = sub.add_parser("view", help="render orthographic PNGs")
+    common(sp)
+    sp.add_argument("--views", default="iso,front,right,top",
+                    help="comma list: " + ",".join(VIEWS))
+    sp.add_argument("--out", metavar="DIR",
+                    help="where to write PNGs (default: a temp dir, so renders "
+                         "never land in the repo)")
+    sp.add_argument("--size", default="900x900", metavar="WxH")
+    sp.add_argument("--cut", metavar="AXIS=POS",
+                    help="cut away everything above the plane to expose interiors")
+    sp.add_argument("--cut-keep", choices=["low", "high"], default="low",
+                    help="which side of the cut to keep (default low)")
+    sp.add_argument("--clean", action="store_true",
+                    help="render without the axes/scale/edge overlays")
+    sp.add_argument("--perspective", action="store_true")
+    sp.add_argument("--render", action="store_true",
+                    help="full CGAL/Manifold render instead of preview")
+    sp.add_argument("--colorscheme", default="Cornfield")
+    sp.set_defaults(func=cmd_view)
+
+    sp = sub.add_parser("export", help="export a mesh")
+    common(sp)
+    sp.add_argument("-o", "--output", required=True)
+    sp.add_argument("--binary", action="store_true", default=True)
+    sp.set_defaults(func=cmd_export)
+
+    args = p.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()

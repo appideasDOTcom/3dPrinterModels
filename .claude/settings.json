@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.claude/tools/scad:*)",
+      "Bash(/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD:*)",
+      "Bash(openscad:*)"
+    ]
+  }
+}
