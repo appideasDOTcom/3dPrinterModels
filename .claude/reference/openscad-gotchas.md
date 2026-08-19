@@ -77,3 +77,11 @@ offset( r = 0.6 ) offset( r = -0.6 ) shape();   // kills anything under 1.2 mm
 
 Reading widths off an SVG's point list is not a substitute: doing that here gave
 2.7 mm for webs that measured 4.5 mm.
+
+## `scad export` writes binary STL; the GUI writes ASCII
+
+The harness exports binary, OpenSCAD's own File > Export writes ASCII. The same
+geometry therefore lands at roughly a quarter of the size — 141 KB against
+658 KB for the base here — with an identical facet count. Slicers read both.
+If a re-export looks like it lost resolution, check the first six bytes before
+believing it: ASCII files begin `solid `, the harness stamps `OpenSC...`.

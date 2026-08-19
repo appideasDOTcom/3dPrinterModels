@@ -51,6 +51,12 @@ measurement, not a guess.
 - **`slice` measures a real cross-section**, not an intended one — it intersects the mesh with a thin slab and
   reports the extents plus the solid area in that plane. Use it for wall thickness, clearance gaps, and "is there
   actually material there".
+- **The model is undeflected; the assembled part is not.** A snap fit modelled at rest shows interference that
+  the real spring takes up, so a raw `fit` on it measures nothing useful. Re-express the seated state with `-D`
+  instead: move the finger out by its preload while holding the hook profile fixed
+  (`-D snap_shank_clearance=0.8 -D snap_preload=0`), and `fit` then reports the true seated clearance — 4.2586 mm³
+  of locator rib and nothing else, exactly as predicted. Sweeping a `-D` deflection at a fixed lift measures the
+  release travel the same way.
 - **Look at the renders.** `view` prints the PNG paths; read them back and judge the geometry against the
   requirement. A render that looks wrong is worth more than a bounding box that looks right.
 - Renders default to a temp dir so they never land in the repo. `--out DIR` keeps them somewhere on purpose.
@@ -75,6 +81,11 @@ turn the harness from a spell-checker into a proof:
   geometry for both. So drive the parts together deliberately and confirm you
   get the collision you can compute. A control that lands on the predicted
   number is what makes the clean result mean something.
+- **A control has to vary something the answer actually depends on.** Driving `snap_slot_width` to a hairline
+  changed nothing, because the blank width and the slot spread were both derived from it and the clear width came
+  out at `snap_finger_width` either way — the test could not fail, so passing it meant nothing. Overriding
+  `snap_finger_width` to 20 and predicting 2 × 20 × 1.6 = 64.00 mm² was the real control. Before trusting a
+  control, ask what value it would print if the model *were* broken.
 - **Watch for a preloaded baseline.** If some other feature is already
   interfering, the first non-zero sample in a sweep tells you nothing; the point
   where the curve *turns up* is where a new feature engages. `scad fit --sweep`

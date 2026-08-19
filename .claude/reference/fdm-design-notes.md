@@ -29,6 +29,33 @@ F = k·δ              force to deflect by δ
 Thickness is cubed in both `I` and the stiffness, so it dominates everything.
 Doubling thickness is 8× the force.
 
+**`L` is root-to-LOAD, not root-to-tip.** The load is at the hook, and any finger
+that continues past its hook is dead weight — it adds no compliance. Getting this
+wrong cost 46% here: quoting the finger's 17.7 mm overall length instead of the
+14.65 mm to its hook understated stiffness as 23 N/mm when it was 41, and root
+stress as 27 MPa when it was 39. Measure the arm to the *contact surface*, and
+when the hook has a land, to the corner that actually bears.
+
+**Width is the one free lever.** Look at what `b` does and does not appear in:
+
+```
+k = 3EI/L³  ∝ b        force scales with width
+ε = 3tδ/(2L²)          no width term at all
+```
+
+So widening a finger buys holding force at *zero* cost in strain. When a design
+is stress-limited — as any short cantilever in PLA quickly is — width is the
+first thing to spend and the last thing to be short of. Here 36 → 48 mm was +33%
+of grip at an unchanged 39.147 MPa. The only cost is that a release lever working
+against that spring gets proportionally harder.
+
+**An empirical stress ceiling beats a textbook one.** PLA interlayer strength is
+usually quoted around 40 MPa, but the number that matters is what *this* filament
+on *this* printer survives. The first finger in this repo ran at 39.2 MPa and was
+assembled repeatedly without cracking, which licenses later designs up to that
+figure with far more confidence than a handbook value. When a part survives, write
+down the stress it survived at.
+
 **A closed loop cannot flex.** A collar wrapping a box is not a cantilever; its
 ends are restrained by the loop and by whatever caps it. The first version of
 the battery case put detent beads on a 6 mm-deep collar, 1.6 mm thick, needing
@@ -184,6 +211,27 @@ wall it continues makes it a rectangular extension, flush inside and out. No ste
 on the inside, no seam on the outside, and the root fillet a thin finger needs
 goes away with them. It costs `(t₂/t₁)³` in stiffness, so it is only affordable
 once the finger is long enough.
+
+**Where retention sits decides how it resists a peel.** Straight pull-off is the
+easy case. The real load is someone lifting one edge, which pivots the lid about
+the opposite rim and gives them a lever on everything inboard of it. Latches on
+the centreline of a 83 mm span see a 2:1 disadvantage — 117 N of straight
+pull-off became ~58 N at a long edge.
+
+The tempting fix is to split each latch in two and move the halves out toward the
+corners, closer to the lifted edge. **It makes things worse.** With a rigid lid,
+a latch at distance `y` from the pivot rises by `δ_edge · y/span`, so latches at
+different `y` do not release together — the near one reaches full deflection and
+lets go while the far one has barely closed its seat gap. You get sequential
+release at roughly half the peak resistance instead of two latches acting at once.
+Latches on the centreline all rise equally, which is why the centred position is
+already optimal for a two-latch layout.
+
+Real improvement means latches on the *lifted* wall itself, and that is not free
+either: **every finger you add multiplies the closing force.** Going from two
+fingers to six here would have taken the press-to-close from 63 N to about 130 N
+— trading a satisfying close for edge-lift resistance the part may never need.
+Decide which load actually occurs before paying for it.
 
 ## Fit and slop
 
