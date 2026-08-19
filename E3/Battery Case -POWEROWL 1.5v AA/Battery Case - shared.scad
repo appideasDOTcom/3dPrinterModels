@@ -88,7 +88,11 @@ collar_thinckness = 1.6;
 // contact at all. Both add to travel, so force scales with their sum.
 snap_engage  = 0.50;
 snap_preload = 0.50;
-snap_finger_width = 36.0;
+// Width is the one lever that buys holding force for free: k scales with it,
+// but bending stress (3*t*d/(2*L^2)) has no width term at all. 48 mm is +33% of
+// grip at exactly the same 39 MPa root stress. It costs proportionally more
+// effort at the wings, which is the only reason not to go wider still.
+snap_finger_width = 48.0;
 // Full wall thickness: the finger is a rectangular continuation of the collar,
 // flush on both faces. That removes the seam on the outside AND the step on the
 // inside, so the root fillet the old thin finger needed is gone with them.
@@ -127,7 +131,9 @@ locator_width  = 3.0;
 // A small flat at the tip rather than a knife edge, so it wears in and stops
 locator_flat   = 0.8;
 locator_lead_in = 2.0;
-locator_positions_y = [20.0, 63.0];
+// Moved outboard to clear the wider finger's slots (which land at 16.5 and
+// 66.5). A wider stance locates the lid better anyway.
+locator_positions_y = [10.0, 73.0];
 
 /* --- Lift tabs on the short ends --- */
 // The wings sit ON the snap fingers, so where they sit along the finger decides
