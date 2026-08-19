@@ -25,6 +25,8 @@ scad slice   FILE --at z=10        real cross-section: extents and solid area at
 scad check   FILE                  compile; errors, warnings, manifoldness
 scad view    FILE [--views ...]    orthographic PNGs; --cut x=30 to expose interiors
 scad export  FILE -o out.stl       mesh export
+scad components FILE               disconnected islands (manifold misses these)
+scad fit     A.scad B.scad         interference between two parts; --sweep to find play
 ```
 
 All of them take `-D var=val` (repeatable) to override variables, and `-m 'expr()'` to target a single module
@@ -75,8 +77,10 @@ Techniques that matter:
    placement off a product photo; marketing images are staged and are context only, not evidence.
 2. Describe the geometry approach in plain language, 2–3 sentences, before writing code.
 3. Write the full `.scad` file. Partial snippets only when editing an existing file, which you edit in place.
-4. **Verify before reporting**: `scad check` → `scad measure` against the intent → `scad view` and look at the
-   image. Fix what the tools show, then say what they said.
+4. **Verify before reporting**: `scad check` → `scad measure` against the intent → `scad components` →
+   `scad view` and look at the image. Predict each number before you measure it, and pair any clean
+   result on a fit with a control that must collide — empty geometry and a broken test look identical.
+   Fix what the tools show, then say what they said.
 5. Report print orientation, any supports needed, and the key variables the user is likely to tune.
 
 ## Repo style
@@ -174,5 +178,10 @@ spacer();
 
 ## Reference
 
+- `.claude/reference/fdm-design-notes.md` — read before designing anything that flexes, snaps, presses
+  together or spans a cutout. Compliance arithmetic, snap ramp mechanics, tolerance strategy, thin-web
+  strength, fillet practice, all with measured numbers.
+- `.claude/reference/openscad-gotchas.md` — read when a measurement looks wrong, before hand-rolling a
+  `use <>` wrapper, and before importing SVG.
 - OpenSCAD docs: <https://openscad.org/documentation.html>
 - OpenSCAD cheatsheet: <https://openscad.org/cheatsheet/>

@@ -30,6 +30,9 @@ hand-derivation fails silently. OpenSCAD will answer exactly, in well under a se
 | What does it actually look like? | `scad view FILE --views iso,front,right,top` |
 | What does the inside look like? | `scad view FILE --views right --cut x=30` |
 | Will it fit the bed? How much filament? | `scad measure FILE` |
+| Did a boolean orphan any geometry? | `scad components FILE` |
+| Do these two parts actually fit together? | `scad fit BASE.scad LID.scad` |
+| How much play is there, and on which axis? | `scad fit A B --sweep x:0,0.5,0.05` |
 | Give me a mesh | `scad export FILE -o out.stl` |
 
 Every subcommand takes `-D var=val` (repeatable) to override variables, so "what if the wall were 4 mm" is a
@@ -57,11 +60,34 @@ measurement, not a guess.
 - Named views are true orthographic and verified: `front` looks down +Y (X right, Z up), `right` looks down −X
   (Y left, Z up), `top` looks down −Z (X right, Y up), plus `back`, `left`, `bottom`, `iso`.
 
+### Prove it, don't just check it
+
+A measurement that agrees with you is worth very little on its own. Three habits
+turn the harness from a spell-checker into a proof:
+
+- **Predict, then measure.** Work the number out by hand first and say it, then
+  run the tool. When `slice` returns 646.40 mm² and you predicted
+  670.40 − 15 × 1.6 = 646.40, the geometry is right and you know why. When it
+  disagrees, you have found something — every real defect this repo has caught
+  showed up as a prediction that missed.
+- **Pair every clean result with a control that must fail.** "No interference"
+  and "the test is broken" produce identical output — OpenSCAD reports empty
+  geometry for both. So drive the parts together deliberately and confirm you
+  get the collision you can compute. A control that lands on the predicted
+  number is what makes the clean result mean something.
+- **Watch for a preloaded baseline.** If some other feature is already
+  interfering, the first non-zero sample in a sweep tells you nothing; the point
+  where the curve *turns up* is where a new feature engages. `scad fit --sweep`
+  reports both.
+
 ### After every model change
 
 1. `scad check FILE` — errors, warnings, and manifoldness.
 2. `scad measure FILE` — compare the real bounding box against what the change was supposed to do.
-3. `scad view FILE --views iso,<the view that shows the change>` — and actually look at the image.
+3. `scad components FILE` — a boolean that orphans geometry still reports as manifold; this is the check
+   that catches islands, and islands fall out of the print.
+4. `scad view FILE --views iso,<the view that shows the change>` — and actually look at the image.
+5. For anything that mates, `scad fit` both halves, with a control.
 
 Report what the tools said. If a dimension is in your answer, it came from step 2, not from your head.
 
@@ -178,6 +204,22 @@ Match the value already in the file you're editing (`scad eval FILE m3NutDiamete
 - **Shared code.** `printerx/Shared-modules.scad` holds modules used by more than one printerx component
   (e.g. `essCurve`) — reach for it before writing a new helper there. `Brush holder/` is the only tree that uses
   BOSL2; don't introduce that dependency elsewhere.
+
+## Reference
+
+Two files carry the accumulated engineering knowledge. They are not background
+reading — load the relevant one before you design, or you will re-derive it
+wrongly.
+
+- **`.claude/reference/fdm-design-notes.md`** — read before designing anything
+  that flexes, snaps, presses together, or spans a cutout. Carries the
+  compliance arithmetic (`k = 3EI/L³`), snap-fit ramp mechanics, tolerance and
+  slop strategy, thin-web strength, and fillet practice, with the measured
+  numbers behind each. The headline: *a closed loop cannot flex* — a detent on
+  one needs ~330 N and simply will not work.
+- **`.claude/reference/openscad-gotchas.md`** — read when a measurement looks
+  wrong, before hand-rolling a `use <>` wrapper, and before importing SVG. Every
+  entry produced silently incorrect geometry here.
 
 ## Delegating
 

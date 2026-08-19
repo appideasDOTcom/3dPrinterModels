@@ -10,6 +10,8 @@ Answer questions about a model by asking OpenSCAD, not by tracing variables by h
   scad slice   FILE --at z=10        extents of the cross-section at a plane
   scad view    FILE [--views ...]    orthographic PNG renders, optionally cut away
   scad export  FILE -o OUT.stl       mesh export
+  scad components FILE               count disconnected islands in the mesh
+  scad fit     A.scad B.scad         interference between two parts, with sweeps
 
 Every subcommand takes --module 'expr()' to target one module instead of the whole
 file, and -D var=val (repeatable) to override variables.
@@ -234,6 +236,56 @@ def stl_stats(path):
         "max": hi,
         "size": [hi[i] - lo[i] for i in range(3)],
     }
+
+
+def components(path):
+    """Connected components of a binary STL, by shared vertices. Returns a list
+    of (vertex_count, volume) sorted by volume, largest first."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    count = struct.unpack("<I", data[80:84])[0]
+    parent = {}
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+
+    off = 84
+    unpack = struct.Struct("<12fH").unpack_from
+    tris = []
+    for _ in range(count):
+        v = unpack(data, off)
+        off += 50
+        vs = [tuple(round(c, 4) for c in v[3:6]),
+              tuple(round(c, 4) for c in v[6:9]),
+              tuple(round(c, 4) for c in v[9:12])]
+        for pt in vs:
+            parent.setdefault(pt, pt)
+        union(vs[0], vs[1])
+        union(vs[1], vs[2])
+        tris.append(vs)
+
+    vols = {}
+    sizes = {}
+    for vs in tris:
+        (ax, ay, az), (bx, by, bz), (cx, cy, cz) = vs
+        r = find(vs[0])
+        vols[r] = vols.get(r, 0.0) + (ax * (by * cz - bz * cy)
+                                      - ay * (bx * cz - bz * cx)
+                                      + az * (bx * cy - by * cx)) / 6.0
+    for pt in parent:
+        r = find(pt)
+        sizes[r] = sizes.get(r, 0) + 1
+    out = [(sizes[r], abs(v)) for r, v in vols.items()]
+    out.sort(key=lambda t: -t[1])
+    return out
 
 
 def bbox_of(summary):
@@ -491,6 +543,126 @@ def cmd_view(args):
             print(p)
 
 
+def cmd_components(args):
+    """Islands fall out of a print. A boolean that orphans geometry still
+    reports as manifold, so manifold is not the check — this is."""
+    tmp = Temp()
+    stl, summary, _ = export_stl(tmp, args)
+    comps = components(stl)
+    if args.json:
+        print(json.dumps({"count": len(comps),
+                          "components": [{"vertices": n, "volume_mm3": v}
+                                         for n, v in comps]}, indent=2))
+        return
+    print("%d connected component(s)" % len(comps))
+    for i, (n, v) in enumerate(comps):
+        print("  %d: %10.1f mm^3   (%d vertices)" % (i + 1, v, n))
+    if len(comps) > 1:
+        print("  WARNING: everything past the first is a loose island",
+              file=sys.stderr)
+    sys.exit(1 if len(comps) > 1 else 0)
+
+
+def parse_sweep(spec):
+    m = re.match(r"^\s*([xyz])\s*:\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*([\d.]+)\s*$",
+                 spec, re.I)
+    if not m:
+        die("--sweep must look like z:0,0.6,0.05  (axis:from,to,step)")
+    axis = m.group(1).lower()
+    lo, hi, step = float(m.group(2)), float(m.group(3)), float(m.group(4))
+    if step <= 0:
+        die("--sweep step must be positive")
+    vals, x = [], lo
+    while x <= hi + 1e-9:
+        vals.append(round(x, 6))
+        x += step
+    return axis, vals
+
+
+def cmd_fit(args):
+    """
+    Intersect two parts as assembled. Zero volume means they fit.
+
+    An empty result is ALSO what a broken test returns — a mistyped module, a
+    file that rendered nothing — so pair every zero with a control that must
+    collide, and check the control against a number you worked out by hand.
+    --sweep does that automatically and finds where contact begins, which is
+    how you measure real slop rather than the slop you intended.
+    """
+    tmp = Temp()
+    a_stl, _, _ = export_stl(tmp, args, name="a.stl", src=args.file)
+    b_stl, _, _ = export_stl(tmp, args, name="b.stl", src=args.other)
+
+    def overlap(dx, dy, dz):
+        src = tmp.write("fit.scad",
+                        '$fa = 1;\n$fs = 0.1;\n'
+                        'intersection() {\n'
+                        '  import("%s", convexity=10);\n'
+                        '  translate([%.6f, %.6f, %.6f]) import("%s", convexity=10);\n'
+                        '}\n' % (scad_path(a_stl), dx, dy, dz, scad_path(b_stl)))
+        out = tmp.path("fit.stl")
+        run(["--backend", "Manifold", "--export-format", "binstl", "-o", out, src])
+        if not os.path.exists(out):
+            return 0.0
+        st = stl_stats(out)
+        return st["volume_mm3"] if st and st["facets"] else 0.0
+
+    base = [float(x) for x in (args.offset or "0,0,0").split(",")]
+    if len(base) != 3:
+        die("--offset must be x,y,z")
+
+    if args.sweep:
+        axis, vals = parse_sweep(args.sweep)
+        idx = "xyz".index(axis)
+        rows = []
+        for v in vals:
+            off = list(base)
+            off[idx] += v
+            rows.append((v, overlap(*off)))
+        first = next((v for v, o in rows if o > 1e-9), None)
+        # Other features may hold a constant interference of their own — locator
+        # ribs, crush ribs, anything preloaded. Against that baseline the first
+        # non-zero sample is meaningless; what marks a NEW feature engaging is
+        # the point where the curve turns upward.
+        rise = None
+        for i in range(1, len(rows)):
+            if rows[i][1] > rows[i - 1][1] + 1e-6:
+                rise = rows[i][0]
+                break
+        if args.json:
+            print(json.dumps({"axis": axis, "first_contact": first,
+                              "first_rise": rise,
+                              "sweep": [{"offset": v, "volume_mm3": o}
+                                        for v, o in rows]}, indent=2))
+            return
+        print("%s offset   interference" % axis)
+        for v, o in rows:
+            print("  %+8.3f   %s" % (v, "free" if o <= 1e-9
+                                     else "%10.4f mm^3" % o))
+        print("first contact at %s = %s"
+              % (axis, "none in range" if first is None else "%+.3f" % first))
+        print("first rise    at %s = %s   <- a new feature engaging here"
+              % (axis, "none in range" if rise is None else "%+.3f" % rise))
+        if first is not None and rows[0][1] > 1e-9:
+            print("note: interference is already non-zero at the start of the "
+                  "sweep, so something is preloaded; trust the rise, not the "
+                  "contact.")
+        return
+
+    vol = overlap(*base)
+    if args.json:
+        print(json.dumps({"offset": base, "volume_mm3": vol}, indent=2))
+        return
+    print("interference at offset [%g, %g, %g]: %s"
+          % (base[0], base[1], base[2],
+             "none — the parts fit" if vol <= 1e-9 else "%.4f mm^3" % vol))
+    if vol <= 1e-9:
+        print("  now run a control that MUST collide, e.g. --offset with the",
+              file=sys.stderr)
+        print("  parts driven together, and check it against a hand figure.",
+              file=sys.stderr)
+
+
 def cmd_export(args):
     tmp = Temp()
     src = target_scad(tmp, args)
@@ -579,6 +751,23 @@ def main():
                     help="full CGAL/Manifold render instead of preview")
     sp.add_argument("--colorscheme", default="Cornfield")
     sp.set_defaults(func=cmd_view)
+
+    sp = sub.add_parser("components",
+                        help="count disconnected islands (manifold does not catch these)")
+    common(sp)
+    sp.set_defaults(func=cmd_components)
+
+    sp = sub.add_parser("fit", help="interference between two parts as assembled")
+    sp.add_argument("file", help="first part")
+    sp.add_argument("other", help="second part, the one that gets offset")
+    sp.add_argument("--offset", metavar="X,Y,Z", help="displace the second part")
+    sp.add_argument("--sweep", metavar="AXIS:FROM,TO,STEP",
+                    help="sweep the second part along an axis and report where "
+                         "contact begins, e.g. z:0,0.6,0.05")
+    sp.add_argument("-D", "--define", action="append", metavar="var=val")
+    sp.add_argument("--json", action="store_true")
+    sp.set_defaults(module=None, include=False)
+    sp.set_defaults(func=cmd_fit)
 
     sp = sub.add_parser("export", help="export a mesh")
     common(sp)
